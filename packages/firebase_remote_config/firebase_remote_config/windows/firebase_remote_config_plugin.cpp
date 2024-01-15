@@ -18,6 +18,8 @@
 // #include "FirebaseRemoteConfigImplementation.h"
 #include "FirebaseRemoteConfigImplementation.h"
 #include "firebase_core/singleton.h"
+#include "messages.g.h"
+#include "remote_config_pigeon_implemetation.h"
 
 using namespace firebase::remote_config;
 
@@ -53,6 +55,9 @@ namespace firebase_remote_config_windows
         auto shared_plugin = std::make_shared<FirebaseRemoteConfigImplementation>();
         //        firebaseRegistry.put_plugin_ref(shared_plugin);
         add_plugin_constant(shared_plugin);
+
+        auto impl = new remote_config_pigeon_implemetation();
+        RemoteConfigHostApi::SetUp(registrar->messenger(), impl);
 
         registrar->AddPlugin(std::move(plugin));
     }

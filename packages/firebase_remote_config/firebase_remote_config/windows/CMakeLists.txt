@@ -24,6 +24,8 @@ list(APPEND PLUGIN_SOURCES
         "messages.g.cpp"
         "FirebaseRemoteConfigImplementation.h"
         "FirebaseRemoteConfigImplementation.cpp"
+        "remote_config_pigeon_implemetation.h"
+        "remote_config_pigeon_implemetation.cpp"
 )
 
 # Read version from pubspec.yaml

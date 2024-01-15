@@ -79,15 +79,15 @@ namespace firebase_remote_config_windows
 
     std::string mapLastFetchStatus(LastFetchStatus lastFetchStatus)
     {
-        //        if (lastFetchStatus == LastFetchStatus.kLastFetchStatusSuccess) {
-        //            return "success";
-        //        } else if (lastFetchStatus == LastFetchStatus.kLastFetchStatusFailure) {
-        //            return "failure";
-        //        } else if (lastFetchStatus == LastFetchStatus.kLastFetchStatusPending) {
-        //            return "noFetchYet";
-        //        } else {
-        //            return "failure";
-        //        }
+                if (lastFetchStatus == kLastFetchStatusSuccess) {
+                    return "success";
+                } else if (lastFetchStatus == kLastFetchStatusFailure) {
+                    return "failure";
+                } else if (lastFetchStatus == kLastFetchStatusPending) {
+                    return "noFetchYet";
+                } else {
+                    return "failure";
+                }
         return "success";
     }
 
