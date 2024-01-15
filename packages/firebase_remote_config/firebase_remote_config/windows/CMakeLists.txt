@@ -18,16 +18,39 @@ set(PLUGIN_NAME "firebase_remote_config_plugin")
 
 # Any new source files that you add to the plugin should be added here.
 list(APPEND PLUGIN_SOURCES
-  "firebase_remote_config_plugin.cpp"
-  "firebase_remote_config_plugin.h"
+        "firebase_remote_config_plugin.cpp"
+        "firebase_remote_config_plugin.h"
+        "messages.g.h"
+        "messages.g.cpp"
+        "FirebaseRemoteConfigImplementation.h"
+        "FirebaseRemoteConfigImplementation.cpp"
 )
+
+# Read version from pubspec.yaml
+file(STRINGS "../pubspec.yaml" pubspec_content)
+foreach(line ${pubspec_content})
+    string(FIND ${line} "version: " has_version)
+
+    if("${has_version}" STREQUAL "0")
+        string(FIND ${line} ": " version_start_pos)
+        math(EXPR version_start_pos "${version_start_pos} + 2")
+        string(LENGTH ${line} version_end_pos)
+        math(EXPR len "${version_end_pos} - ${version_start_pos}")
+        string(SUBSTRING ${line} ${version_start_pos} ${len} PLUGIN_VERSION)
+        break()
+    endif()
+endforeach(line)
+
+configure_file(plugin_version.h.in ${CMAKE_BINARY_DIR}/generated/firebase_auth/plugin_version.h)
+include_directories(${CMAKE_BINARY_DIR}/generated/)
 
 # Define the plugin library target. Its name must not be changed (see comment
 # on PLUGIN_NAME above).
-add_library(${PLUGIN_NAME} SHARED
-  "include/firebase_remote_config/firebase_remote_config_plugin_c_api.h"
-  "firebase_remote_config_plugin_c_api.cpp"
-  ${PLUGIN_SOURCES}
+add_library(${PLUGIN_NAME} STATIC
+        "include/firebase_remote_config/firebase_remote_config_plugin_c_api.h"
+        "firebase_remote_config_plugin_c_api.cpp"
+        ${PLUGIN_SOURCES}
+        ${CMAKE_BINARY_DIR}/generated/firebase_auth/plugin_version.h
 )
 
 # Apply a standard set of build settings that are configured in the
@@ -39,21 +62,30 @@ apply_standard_settings(${PLUGIN_NAME})
 # between plugins. This should not be removed; any symbols that should be
 # exported should be explicitly exported with the FLUTTER_PLUGIN_EXPORT macro.
 set_target_properties(${PLUGIN_NAME} PROPERTIES
-  CXX_VISIBILITY_PRESET hidden)
-target_compile_definitions(${PLUGIN_NAME} PRIVATE FLUTTER_PLUGIN_IMPL)
+        CXX_VISIBILITY_PRESET hidden)
+target_compile_definitions(${PLUGIN_NAME} PUBLIC FLUTTER_PLUGIN_IMPL)
+# Enable firebase-cpp-sdk's platform logging api.
+target_compile_definitions(${PLUGIN_NAME} PRIVATE -DINTERNAL_EXPERIMENTAL=1)
+
+# Source include directories and library dependencies. Add any plugin-specific
+# dependencies here.
+set(MSVC_RUNTIME_MODE MD)
+set(firebase_libs firebase_core_plugin firebase_remote_config firebase_app)
+set(ADDITIONAL_LIBS advapi32 ws2_32 crypt32 rpcrt4 ole32)
+target_link_libraries(${PLUGIN_NAME} PRIVATE "${firebase_libs}" "${ADDITIONAL_LIBS}")
 
 # Source include directories and library dependencies. Add any plugin-specific
 # dependencies here.
 target_include_directories(${PLUGIN_NAME} INTERFACE
-  "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
+        "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin singleton)
 
 # List of absolute paths to libraries that should be bundled with the plugin.
 # This list could contain prebuilt libraries, or libraries created by an
 # external build triggered from this build file.
 set(firebase_remote_config_bundled_libraries
-  ""
-  PARENT_SCOPE
+        ""
+        PARENT_SCOPE
 )
 
 # === Tests ===
@@ -63,38 +95,38 @@ set(firebase_remote_config_bundled_libraries
 # Only enable test builds when building the example (which sets this variable)
 # so that plugin clients aren't building the tests.
 if (${include_${PROJECT_NAME}_tests})
-set(TEST_RUNNER "${PROJECT_NAME}_test")
-enable_testing()
+    set(TEST_RUNNER "${PROJECT_NAME}_test")
+    enable_testing()
 
-# Add the Google Test dependency.
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/release-1.11.0.zip
-)
-# Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-# Disable install commands for gtest so it doesn't end up in the bundle.
-set(INSTALL_GTEST OFF CACHE BOOL "Disable installation of googletest" FORCE)
-FetchContent_MakeAvailable(googletest)
+    # Add the Google Test dependency.
+    include(FetchContent)
+    FetchContent_Declare(
+            googletest
+            URL https://github.com/google/googletest/archive/release-1.11.0.zip
+    )
+    # Prevent overriding the parent project's compiler/linker settings
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    # Disable install commands for gtest so it doesn't end up in the bundle.
+    set(INSTALL_GTEST OFF CACHE BOOL "Disable installation of googletest" FORCE)
+    FetchContent_MakeAvailable(googletest)
 
-# The plugin's C API is not very useful for unit testing, so build the sources
-# directly into the test binary rather than using the DLL.
-add_executable(${TEST_RUNNER}
-  test/firebase_remote_config_plugin_test.cpp
-  ${PLUGIN_SOURCES}
-)
-apply_standard_settings(${TEST_RUNNER})
-target_include_directories(${TEST_RUNNER} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(${TEST_RUNNER} PRIVATE flutter_wrapper_plugin)
-target_link_libraries(${TEST_RUNNER} PRIVATE gtest_main gmock)
-# flutter_wrapper_plugin has link dependencies on the Flutter DLL.
-add_custom_command(TARGET ${TEST_RUNNER} POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-  "${FLUTTER_LIBRARY}" $<TARGET_FILE_DIR:${TEST_RUNNER}>
-)
+    # The plugin's C API is not very useful for unit testing, so build the sources
+    # directly into the test binary rather than using the DLL.
+    add_executable(${TEST_RUNNER}
+            test/firebase_remote_config_plugin_test.cpp
+            ${PLUGIN_SOURCES}
+    )
+    apply_standard_settings(${TEST_RUNNER})
+    target_include_directories(${TEST_RUNNER} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    target_link_libraries(${TEST_RUNNER} PRIVATE flutter_wrapper_plugin)
+    target_link_libraries(${TEST_RUNNER} PRIVATE gtest_main gmock)
+    # flutter_wrapper_plugin has link dependencies on the Flutter DLL.
+    add_custom_command(TARGET ${TEST_RUNNER} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${FLUTTER_LIBRARY}" $<TARGET_FILE_DIR:${TEST_RUNNER}>
+    )
 
-# Enable automatic test discovery.
-include(GoogleTest)
-gtest_discover_tests(${TEST_RUNNER})
-endif()
+    # Enable automatic test discovery.
+    include(GoogleTest)
+    gtest_discover_tests(${TEST_RUNNER})
+endif ()

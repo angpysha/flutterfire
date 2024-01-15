@@ -6,7 +6,7 @@
 
 void FirebaseRemoteConfigPluginCApiRegisterWithRegistrar(
     FlutterDesktopPluginRegistrarRef registrar) {
-  firebase_remote_config::FirebaseRemoteConfigPlugin::RegisterWithRegistrar(
+  firebase_remote_config_windows::FirebaseRemoteConfigPlugin::RegisterWithRegistrar(
       flutter::PluginRegistrarManager::GetInstance()
           ->GetRegistrar<flutter::PluginRegistrarWindows>(registrar));
 }

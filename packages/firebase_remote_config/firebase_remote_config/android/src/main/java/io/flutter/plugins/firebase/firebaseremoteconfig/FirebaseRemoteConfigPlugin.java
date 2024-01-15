@@ -54,10 +54,10 @@ public class FirebaseRemoteConfigPlugin
 
   @Override
   public void onAttachedToEngine(FlutterPluginBinding binding) {
-    setupChannel(binding.getBinaryMessenger());
-
     RemoteConfigHostApiImpl remoteConfigImpl = new RemoteConfigHostApiImpl();
     GeneratedAndroidFirebaseRemoteConfig.RemoteConfigHostApi.setUp(binding.getBinaryMessenger(), remoteConfigImpl);
+    registerPlugin(METHOD_CHANNEL, this);
+    //setupChannel(binding.getBinaryMessenger());
   }
 
   @Override

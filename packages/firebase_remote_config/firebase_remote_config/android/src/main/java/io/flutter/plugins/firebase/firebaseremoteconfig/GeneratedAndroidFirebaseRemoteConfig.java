@@ -32,7 +32,7 @@ public class GeneratedAndroidFirebaseRemoteConfig {
     /** The error details. Must be a datatype supported by the api codec. */
     public final Object details;
 
-    public FlutterError(@NonNull String code, @Nullable String message, @Nullable Object details) 
+    public FlutterError(@NonNull String code, @Nullable String message, @Nullable Object details)
     {
       super(message);
       this.code = code;
@@ -357,5 +357,7 @@ public class GeneratedAndroidFirebaseRemoteConfig {
         }
       }
     }
+
+    void setConfigSettings(String appName, long fetchTimeout, long minimumFetchInterval, VoidResult result);
   }
 }
