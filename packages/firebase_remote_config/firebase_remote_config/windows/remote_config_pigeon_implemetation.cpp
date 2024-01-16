@@ -107,6 +107,8 @@ namespace firebase_remote_config_windows
         ConfigSettings config_setting{static_cast<uint64_t>(fetch_timeout), static_cast<uint64_t>(minimum_fetch_interval)};
 
         remote_config->SetConfigSettings(config_setting);
+
+        result(std::nullopt);
     }
 
     void remote_config_pigeon_implemetation::SetDefaults(
@@ -148,17 +150,69 @@ namespace firebase_remote_config_windows
     //     return map_;
     // }
 
+    std::string map_source_(ValueSource source)
+    {
+        if (source == kValueSourceStaticValue)
+        {
+            return "static";
+        }
+        else if (source == kValueSourceDefaultValue)
+        {
+            return "default";
+        }
+        else if (source == kValueSourceRemoteValue)
+        {
+            return "remote";
+        }
+        else
+        {
+            return "static";
+        }
+    }
+
+    flutter::EncodableMap create_remote_config_values_map(std::string key, RemoteConfig* remote_config) {
+        flutter::EncodableMap parsed_parameters;
+
+        // value.
+        //
+        //parsed_parameters.insert({"value", value.blob_data()});
+        ValueInfo value_info;
+        auto data = remote_config->GetData(key.c_str(), &value_info);
+
+        parsed_parameters.insert({ EncodableValue("value"), EncodableValue(data) });
+        auto source_mapped = map_source_(value_info.source);
+        parsed_parameters.insert({ EncodableValue("source"), EncodableValue(source_mapped.c_str()) });
+        return parsed_parameters;
+
+    }
+
+    flutter::EncodableMap map_parameters(std::map<std::string, firebase::Variant> parameters, RemoteConfig* remote_config)
+    {
+        flutter::EncodableMap map_;
+
+        for (const auto& val : parameters)
+        {
+            auto param = val.second;
+            auto name = val.first;
+
+            map_.insert({ name, create_remote_config_values_map(name, remote_config) });
+
+        }
+
+        return map_;
+    }
+
     void remote_config_pigeon_implemetation::GetAll(
         const std::string& app_name,
         std::function<void(ErrorOr<std::optional<flutter::EncodableMap>> reply)
         > result)
     {
-        // auto firebase_app = App::GetInstance(app_name.c_str());
-        // auto remote_config = RemoteConfig::GetInstance(firebase_app);
+        auto firebase_app = App::GetInstance(app_name.c_str());
+        auto remote_config = RemoteConfig::GetInstance(firebase_app);
+        
+        auto get_all = remote_config->GetAll();
         //
-        // auto get_all = remote_config->GetAll();
-        //
-        // auto all_mapped = mapParameters(get_all);
+        auto all_mapped = map_parameters(get_all, remote_config);
         //
         // auto to_return = ErrorOr<std::optional<flutter::EncodableMap>>(std::make_optional(all_mapped));
         //
@@ -171,6 +225,8 @@ namespace firebase_remote_config_windows
         //
         //         result(ErrorOr<bool>(is_success));
         //     });
+
+        result(ErrorOr(std::make_optional(all_mapped)));
     }
     //
     // std::string mapLastFetchStatus(LastFetchStatus lastFetchStatus){
@@ -186,32 +242,49 @@ namespace firebase_remote_config_windows
     //     return "success";
     // }
 
+    std::string map_last_fetch_status(LastFetchStatus lastFetchStatus)
+    {
+        if (lastFetchStatus == kLastFetchStatusSuccess) {
+            return "success";
+        }
+        else if (lastFetchStatus == kLastFetchStatusFailure) {
+            return "failure";
+        }
+        else if (lastFetchStatus == kLastFetchStatusPending) {
+            return "noFetchYet";
+        }
+        else {
+            return "failure";
+        }
+        return "success";
+    }
 
     void remote_config_pigeon_implemetation::GetProperties(
         const std::string& app_name,
         std::function<void(ErrorOr<std::optional<flutter::EncodableMap>> reply)> result)
     {
-//        auto firebase_app = App::GetInstance(app_name.c_str());
-//        auto remote_config = RemoteConfig::GetInstance(firebase_app);
-//
-//        auto configSettings = remote_config->GetConfigSettings();
-//        auto fetchTimeout = static_cast<int64_t>(configSettings.fetch_timeout_in_milliseconds);
-//        auto minFetchTimeout = static_cast<int64_t>(configSettings.minimum_fetch_interval_in_milliseconds);
-//
-//        auto configInfo = remote_config->GetInfo();
-//        auto lastFetch = static_cast<int64_t>(configInfo.fetch_time);
-//        auto lastFetchStatus = configInfo.last_fetch_status;
-//        auto lastFetchStatusMapped = mapLastFetchStatus(lastFetchStatus);
-//
-//        flutter::EncodableMap values;
-//
-//        values.insert({ EncodableValue("fetchTimeout"), EncodableValue(fetchTimeout) });
-//        values.insert({ EncodableValue("minimumFetchInterval"), EncodableValue(minFetchTimeout) });
-//        values.insert({ EncodableValue("lastFetchTime"), EncodableValue(lastFetch) });
-//        values.insert({ EncodableValue("lastFetchStatus"), EncodableValue(lastFetchStatusMapped.c_str()) });
-//
-//        auto to_return = ErrorOr<std::optional<flutter::EncodableMap>>(std::make_optional(values));
+        auto firebase_app = App::GetInstance(app_name.c_str());
+        auto remote_config = RemoteConfig::GetInstance(firebase_app);
 
-       // result(ErrorOr<std::optional<flutter::EncodableMap>>(flutter::Error("not impl")));
+        auto configSettings = remote_config->GetConfigSettings();
+        auto fetchTimeout = static_cast<int64_t>(configSettings.fetch_timeout_in_milliseconds);
+        auto minFetchTimeout = static_cast<int64_t>(configSettings.minimum_fetch_interval_in_milliseconds);
+
+        auto configInfo = remote_config->GetInfo();
+        auto lastFetch = static_cast<int64_t>(configInfo.fetch_time);
+        auto lastFetchStatus = configInfo.last_fetch_status;
+        auto lastFetchStatusMapped = map_last_fetch_status(lastFetchStatus);
+//
+        flutter::EncodableMap values;
+
+        values.insert({ EncodableValue("fetchTimeout"), EncodableValue(fetchTimeout) });
+        values.insert({ EncodableValue("minimumFetchInterval"), EncodableValue(minFetchTimeout) });
+        values.insert({ EncodableValue("lastFetchTime"), EncodableValue(lastFetch) });
+        values.insert({ EncodableValue("lastFetchStatus"), EncodableValue(lastFetchStatusMapped.c_str()) });
+//
+        auto to_return = ErrorOr<std::optional<flutter::EncodableMap>>(std::make_optional(values));
+
+        result(to_return);
+        //result(ErrorOr<std::optional<flutter::EncodableMap>>(flutter::Error("not impl")));
     }
 }

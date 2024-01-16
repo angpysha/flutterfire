@@ -79,15 +79,18 @@ namespace firebase_remote_config_windows
 
     std::string mapLastFetchStatus(LastFetchStatus lastFetchStatus)
     {
-                if (lastFetchStatus == kLastFetchStatusSuccess) {
-                    return "success";
-                } else if (lastFetchStatus == kLastFetchStatusFailure) {
-                    return "failure";
-                } else if (lastFetchStatus == kLastFetchStatusPending) {
-                    return "noFetchYet";
-                } else {
-                    return "failure";
-                }
+        if (lastFetchStatus == kLastFetchStatusSuccess) {
+            return "success";
+        }
+        else if (lastFetchStatus == kLastFetchStatusFailure) {
+            return "failure";
+        }
+        else if (lastFetchStatus == kLastFetchStatusPending) {
+            return "noFetchYet";
+        }
+        else {
+            return "failure";
+        }
         return "success";
     }
 
@@ -120,7 +123,8 @@ namespace firebase_remote_config_windows
         else if (source == kValueSourceDefaultValue)
         {
             return "default";
-        } else if (source == kValueSourceRemoteValue)
+        }
+        else if (source == kValueSourceRemoteValue)
         {
             return "remote";
         }
@@ -139,7 +143,7 @@ namespace firebase_remote_config_windows
         ValueInfo value_info;
         auto data = remote_config->GetData(key.c_str(), &value_info);
 
-        parsed_parameters.insert({ EncodableValue("value"), EncodableValue(remote_config) });
+        parsed_parameters.insert({ EncodableValue("value"), EncodableValue(data) });
         auto source_mapped = map_source(value_info.source);
         parsed_parameters.insert({ EncodableValue("source"), EncodableValue(source_mapped.c_str()) });
         return parsed_parameters;
@@ -150,25 +154,13 @@ namespace firebase_remote_config_windows
     {
         flutter::EncodableMap map_;
 
-        for (const auto &val : parameters)
+        for (const auto& val : parameters)
         {
             auto param = val.second;
             auto name = val.first;
 
-            map_.insert({name, createRemoteConfigValuesMap(name, remote_config)});
-            
-//            if (param.is_string())
-//            {
-//                auto str_val = param.string_value();
-//                map_.insert({ flutter::EncodableValue(name.c_str()), EncodableValue(param.string_value()) });
-//            } else if (param.is_bool())
-//            {
-//                map_.insert({ flutter::EncodableValue(name.c_str()), EncodableValue(param.bool_value()) });
-//            } else if (param.is_int64())
-//            {
-//                int64_t int64_val = param.int64_value();
-//                map_.insert({ flutter::EncodableValue(name.c_str()), EncodableValue(int64_val) });
-//            }
+            map_.insert({ name, createRemoteConfigValuesMap(name, remote_config) });
+
         }
 
         return map_;
@@ -200,7 +192,7 @@ namespace firebase_remote_config_windows
         auto configSettings = remoteConfig->GetConfigSettings();
         auto fetchTimeout = static_cast<int64_t>(configSettings.fetch_timeout_in_milliseconds);
         auto minFetchTimeout = static_cast<int64_t>(configSettings.minimum_fetch_interval_in_milliseconds);
-        
+
         auto configInfo = remoteConfig->GetInfo();
         auto lastFetch = static_cast<int64_t>(configInfo.fetch_time);
         auto lastFetchStatus = configInfo.last_fetch_status;
@@ -208,10 +200,10 @@ namespace firebase_remote_config_windows
 
         flutter::EncodableMap values;
 
-        values.insert({EncodableValue("fetchTimeout"), EncodableValue(fetchTimeout)});
-        values.insert({EncodableValue("minimumFetchInterval"), EncodableValue(minFetchTimeout)});
-        values.insert({EncodableValue("lastFetchTime"), EncodableValue(lastFetch)});
-        values.insert({EncodableValue("lastFetchStatus"), EncodableValue(lastFetchStatusMapped.c_str())});
+        values.insert({ EncodableValue("fetchTimeout"), EncodableValue(fetchTimeout) });
+        values.insert({ EncodableValue("minimumFetchInterval"), EncodableValue(minFetchTimeout) });
+        values.insert({ EncodableValue("lastFetchTime"), EncodableValue(lastFetch) });
+        values.insert({ EncodableValue("lastFetchStatus"), EncodableValue(lastFetchStatusMapped.c_str()) });
 
         auto allItems = remoteConfig->GetAll();
 
