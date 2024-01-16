@@ -96,7 +96,57 @@ namespace firebase_remote_config_windows
         return "plugins.flutter.io/firebase_remote_config";
     }
 
-    flutter::EncodableMap mapParameters(std::map<std::string, firebase::Variant> parameters)
+    // - (NSString*)mapValueSource:(FIRRemoteConfigSource)source {
+    //     if (source == FIRRemoteConfigSourceStatic) {
+    //         return @"static";
+    //     }
+    //     else if (source == FIRRemoteConfigSourceDefault) {
+    //         return @"default";
+    //     }
+    //     else if (source == FIRRemoteConfigSourceRemote) {
+    //         return @"remote";
+    //     }
+    //     else {
+    //         return @"static";
+    //     }
+    // }
+
+    std::string map_source(ValueSource source)
+    {
+        if (source == kValueSourceStaticValue)
+        {
+            return "static";
+        }
+        else if (source == kValueSourceDefaultValue)
+        {
+            return "default";
+        } else if (source == kValueSourceRemoteValue)
+        {
+            return "remote";
+        }
+        else
+        {
+            return "static";
+        }
+    }
+
+    flutter::EncodableMap createRemoteConfigValuesMap(std::string key, RemoteConfig* remote_config) {
+        flutter::EncodableMap parsed_parameters;
+
+        // value.
+        //
+        //parsed_parameters.insert({"value", value.blob_data()});
+        ValueInfo value_info;
+        auto data = remote_config->GetData(key.c_str(), &value_info);
+
+        parsed_parameters.insert({ EncodableValue("value"), EncodableValue(remote_config) });
+        auto source_mapped = map_source(value_info.source);
+        parsed_parameters.insert({ EncodableValue("source"), EncodableValue(source_mapped.c_str()) });
+        return parsed_parameters;
+
+    }
+
+    flutter::EncodableMap mapParameters(std::map<std::string, firebase::Variant> parameters, RemoteConfig* remote_config)
     {
         flutter::EncodableMap map_;
 
@@ -105,21 +155,40 @@ namespace firebase_remote_config_windows
             auto param = val.second;
             auto name = val.first;
 
-            if (param.is_string())
-            {
-                auto str_val = param.string_value();
-                map_.insert({ flutter::EncodableValue(name.c_str()), EncodableValue(param.string_value()) });
-            } else if (param.is_bool())
-            {
-                map_.insert({ flutter::EncodableValue(name.c_str()), EncodableValue(param.bool_value()) });
-            } else if (param.is_int64())
-            {
-                int64_t int64_val = param.int64_value();
-                map_.insert({ flutter::EncodableValue(name.c_str()), EncodableValue(int64_val) });
-            }
+            map_.insert({name, createRemoteConfigValuesMap(name, remote_config)});
+            
+//            if (param.is_string())
+//            {
+//                auto str_val = param.string_value();
+//                map_.insert({ flutter::EncodableValue(name.c_str()), EncodableValue(param.string_value()) });
+//            } else if (param.is_bool())
+//            {
+//                map_.insert({ flutter::EncodableValue(name.c_str()), EncodableValue(param.bool_value()) });
+//            } else if (param.is_int64())
+//            {
+//                int64_t int64_val = param.int64_value();
+//                map_.insert({ flutter::EncodableValue(name.c_str()), EncodableValue(int64_val) });
+//            }
         }
 
         return map_;
+    }
+
+    void get_all_parameters(RemoteConfig* remote_config)
+    {
+        // -(NSDictionary*)getAllParametersForInstance:(FIRRemoteConfig*)remoteConfig {
+        //     NSMutableSet* keySet = [[NSMutableSet alloc]init];
+        //     [keySet addObjectsFromArray : [remoteConfig allKeysFromSource : FIRRemoteConfigSourceStatic] ] ;
+        //     [keySet addObjectsFromArray : [remoteConfig allKeysFromSource : FIRRemoteConfigSourceDefault] ] ;
+        //     [keySet addObjectsFromArray : [remoteConfig allKeysFromSource : FIRRemoteConfigSourceRemote] ] ;
+        //
+        //     NSMutableDictionary* parameters = [[NSMutableDictionary alloc]init];
+        //     for (NSString* key in keySet) {
+        //         parameters[key] = [self createRemoteConfigValueDict : [remoteConfig configValueForKey : key] ];
+        //     }
+        //     return parameters;
+        // }
+        // firebase::remote_config::kValueSourceDefaultValue
     }
 
     flutter::EncodableMap FirebaseRemoteConfigImplementation::get_plugin_constants(const ::firebase::App& firebaseApp)
@@ -146,7 +215,7 @@ namespace firebase_remote_config_windows
 
         auto allItems = remoteConfig->GetAll();
 
-        auto converted = mapParameters(allItems);
+        auto converted = mapParameters(allItems, remoteConfig);
 
         values.insert({ EncodableValue("parameters"), converted });
 
