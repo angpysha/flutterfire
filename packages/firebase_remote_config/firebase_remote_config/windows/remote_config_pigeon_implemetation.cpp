@@ -24,11 +24,11 @@ namespace firebase_remote_config_windows
         auto initialized_future = remote_config->EnsureInitialized();
 
         initialized_future.OnCompletion([result](const Future<ConfigInfo>& futureResult)
-        {
-            auto futureResultInfo = futureResult.result();
-            auto isSuccess = futureResult.status() == kFutureStatusComplete;
-            result(std::nullopt);
-        });
+            {
+                auto futureResultInfo = futureResult.result();
+                auto isSuccess = futureResult.status() == kFutureStatusComplete;
+                result(std::nullopt);
+            });
 
         //        initialized_future.OnCompletion([&] (const Future<ConfigInfo*>) -> {
         //            result(std::nullopt);
@@ -56,11 +56,11 @@ namespace firebase_remote_config_windows
         auto activate_future = remote_config->Activate();
 
         activate_future.OnCompletion([result](const Future<bool>& activate_future_completion)
-        {
-            bool is_success = activate_future_completion.result();
+            {
+                bool is_success = activate_future_completion.result();
 
-            result(ErrorOr<bool>(is_success));
-        });
+                result(ErrorOr<bool>(is_success));
+            });
     }
 
     void remote_config_pigeon_implemetation::Fetch(
@@ -73,9 +73,9 @@ namespace firebase_remote_config_windows
         auto fetch_future = remote_config->EnsureInitialized();
 
         fetch_future.OnCompletion([result](const Future<ConfigInfo>& fetch_future_completion)
-        {
-            result(std::nullopt);
-        });
+            {
+                result(std::nullopt);
+            });
     }
 
     void remote_config_pigeon_implemetation::FetchAndActivate(
@@ -88,11 +88,11 @@ namespace firebase_remote_config_windows
         auto activate_future = remote_config->FetchAndActivate();
 
         activate_future.OnCompletion([result](const Future<bool>& activate_future_completion)
-        {
-            bool is_success = activate_future_completion.result();
+            {
+                bool is_success = activate_future_completion.result();
 
-            result(ErrorOr<bool>(is_success));
-        });
+                result(ErrorOr<bool>(is_success));
+            });
     }
 
     void remote_config_pigeon_implemetation::SetConfigSettings(
@@ -104,49 +104,117 @@ namespace firebase_remote_config_windows
         auto firebase_app = App::GetInstance(app_name.c_str());
         auto remote_config = RemoteConfig::GetInstance(firebase_app);
 
-        ConfigSettings config_setting{static_cast<uint64_t>(fetch_timeout), static_cast<uint64_t>(minimum_fetch_interval)};
+        ConfigSettings config_setting{ static_cast<uint64_t>(fetch_timeout), static_cast<uint64_t>(minimum_fetch_interval) };
 
         remote_config->SetConfigSettings(config_setting);
 
         result(std::nullopt);
     }
 
-    std::pair<std::vector<ConfigKeyValueVariant>, std::vector<std::pair<std::string, std::string>>> convert_to_native_(const flutter::EncodableMap& default_parameters)
+    Variant to_variant_(EncodableValue encodableValue)
     {
-       /* std::vector<ConfigKeyValue> parameter;
+        /// Null, or no data.
+       // kTypeNull,
+            /// A 64-bit integer.
+            //kTypeInt64,
+            /// A double-precision floating point number.
+           // kTypeDouble,
+            /// A boolean value.
+            //kTypeBool,
+            /// A statically-allocated string we point to.
+            //kTypeStaticString,
+            /// A std::string.
+           // kTypeMutableString,
+            /// A std::vector of Variant.
+           // kTypeVector,
+            /// A std::map, mapping Variant to Variant.
+          //  kTypeMap,
+            /// An statically-allocated blob of data that we point to. Never constructed
+            /// by default. Use Variant::FromStaticBlob() to create a Variant of this
+            /// type.
+          //  kTypeStaticBlob,
+            /// A blob of data that the Variant holds. Never constructed by default. Use
+            /// Variant::FromMutableBlob() to create a Variant of this type, and copy
+            /// binary data from an existing source.
+         //   kTypeMutableBlob,
 
-        for (auto &items : default_parameters)
+        // std::variant<std::monostate,
+        //     bool,
+        //     int32_t,
+        //     int64_t,
+        //     double,
+        //     std::string,
+        //     std::vector<uint8_t>,
+        //     std::vector<int32_t>,
+        //     std::vector<int64_t>,
+        //     std::vector<double>,
+        //     EncodableList,
+        //     EncodableMap,
+        //     CustomEncodableValue,
+        //     std::vector<float>>;
+        if (std::holds_alternative<bool>(encodableValue))
         {
-            if (std::holds_alternative<std::string>(items.first) && std::holds_alternative<std::string>(items.second))
-            {
-                std::string key_str = std::get<std::string>(items.first);
-                std::string value_str = std::get<std::string>(items.second);
-
-                ConfigKeyValue value = { key_str.c_str(), value_str.c_str() };
-                parameter.push_back(value);
-            }
+            auto value = std::get<bool>(encodableValue);
+            return { value };
         }
 
-        return parameter;*/
+        if (std::holds_alternative<int64_t>(encodableValue))
+        {
+            auto value = std::get<int64_t>(encodableValue);
+            return { value };
+        }
+
+        if (std::holds_alternative<std::string>(encodableValue))
+        {
+            auto value = std::get<std::string>(encodableValue);
+            return { value };
+        }
+
+        if (std::holds_alternative<double>(encodableValue))
+        {
+            auto value = std::get<double>(encodableValue);
+            return { value };
+        }
+
+        return {};
+    }
+
+    std::vector<ConfigKeyValueVariant> convert_to_native_(const flutter::EncodableMap& default_parameters)
+    {
+        /* std::vector<ConfigKeyValue> parameter;
+
+         for (auto &items : default_parameters)
+         {
+             if (std::holds_alternative<std::string>(items.first) && std::holds_alternative<std::string>(items.second))
+             {
+                 std::string key_str = std::get<std::string>(items.first);
+                 std::string value_str = std::get<std::string>(items.second);
+
+                 ConfigKeyValue value = { key_str.c_str(), value_str.c_str() };
+                 parameter.push_back(value);
+             }
+         }
+
+         return parameter;*/
         std::vector<ConfigKeyValueVariant> parameters;
         std::vector<std::pair<std::string, std::string>> storage;
 
         for (const auto& items : default_parameters) {
-            if (std::holds_alternative<std::string>(items.first) && std::holds_alternative<std::string>(items.second)) {
+            if (std::holds_alternative<std::string>(items.first)) {
                 std::string key_str = std::get<std::string>(items.first);
-                std::string value_str = std::get<std::string>(items.second);
 
-                storage.emplace_back(std::move(key_str), std::move(value_str));
-                const auto& stored_pair = storage.back();
 
                 ConfigKeyValueVariant kv;
-                kv.key = stored_pair.first.c_str();
-                kv.value = stored_pair.second.c_str();
+                char* key = new char[key_str.size() + 1];
+                //strcpy(key, key_str.c_str());
+                strcpy_s(key, sizeof(char) * key_str.size() + 1, key_str.c_str());
+                kv.key = key;
+                kv.value = to_variant_(items.second);
                 parameters.push_back(kv);
             }
         }
 
-        return { std::move(parameters), std::move(storage) };
+        return parameters;
     }
 
     void remote_config_pigeon_implemetation::SetDefaults(
@@ -158,8 +226,8 @@ namespace firebase_remote_config_windows
         auto remote_config = RemoteConfig::GetInstance(firebase_app);
 
         auto converted_vector = convert_to_native_(default_parameters);
-
-        //remote_config->SetDefaults(converted_vector.first.data(), converted_vector.first.size());
+        int iii = 0;
+        remote_config->SetDefaults(converted_vector.data(), converted_vector.size());
         //remote_config->SetDefaults()
        // remote_config->SetDefaults()
     }
@@ -251,7 +319,7 @@ namespace firebase_remote_config_windows
     {
         auto firebase_app = App::GetInstance(app_name.c_str());
         auto remote_config = RemoteConfig::GetInstance(firebase_app);
-        
+
         auto get_all = remote_config->GetAll();
         //
         auto all_mapped = map_parameters(get_all, remote_config);
@@ -316,14 +384,14 @@ namespace firebase_remote_config_windows
         auto lastFetch = static_cast<int64_t>(configInfo.fetch_time);
         auto lastFetchStatus = configInfo.last_fetch_status;
         auto lastFetchStatusMapped = map_last_fetch_status(lastFetchStatus);
-//
+        //
         flutter::EncodableMap values;
 
         values.insert({ EncodableValue("fetchTimeout"), EncodableValue(fetchTimeout) });
         values.insert({ EncodableValue("minimumFetchInterval"), EncodableValue(minFetchTimeout) });
         values.insert({ EncodableValue("lastFetchTime"), EncodableValue(lastFetch) });
         values.insert({ EncodableValue("lastFetchStatus"), EncodableValue(lastFetchStatusMapped.c_str()) });
-//
+        //
         auto to_return = ErrorOr<std::optional<flutter::EncodableMap>>(std::make_optional(values));
 
         result(to_return);
