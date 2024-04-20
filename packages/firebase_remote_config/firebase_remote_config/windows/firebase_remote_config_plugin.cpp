@@ -58,6 +58,7 @@ namespace firebase_remote_config_windows
 
         auto impl = new remote_config_pigeon_implemetation();
         RemoteConfigHostApi::SetUp(registrar->messenger(), impl);
+        //"plugins.flutter.io/firebase_remote_config_updated"
 
         registrar->AddPlugin(std::move(plugin));
     }
