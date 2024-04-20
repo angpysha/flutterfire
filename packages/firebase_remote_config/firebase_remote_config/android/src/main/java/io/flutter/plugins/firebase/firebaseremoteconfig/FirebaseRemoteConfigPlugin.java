@@ -107,6 +107,7 @@ public class FirebaseRemoteConfigPlugin
     cachedThreadPool.execute(
         () -> {
           try {
+            removeEventListeners();
             taskCompletionSource.setResult(null);
           } catch (Exception e) {
             taskCompletionSource.setException(e);
@@ -311,6 +312,7 @@ public class FirebaseRemoteConfigPlugin
   @SuppressWarnings("unchecked")
   @Override
   public void onCancel(Object arguments) {
+    // arguments will be null on hot restart, so we will clean up listeners in didReinitializeFirebaseCore()
     Map<String, Object> argumentsMap = (Map<String, Object>) arguments;
     if (argumentsMap == null) {
       return;
@@ -322,5 +324,13 @@ public class FirebaseRemoteConfigPlugin
       listener.remove();
       listenersMap.remove(appName);
     }
+  }
+
+  /** Remove all registered listeners. */
+  private void removeEventListeners() {
+    for (ConfigUpdateListenerRegistration listener : listenersMap.values()) {
+      listener.remove();
+    }
+    listenersMap.clear();
   }
 }

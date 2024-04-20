@@ -1,3 +1,59 @@
+## 3.5.2
+
+ - Update a dependency to the latest release.
+
+## 3.5.1
+
+ - Update a dependency to the latest release.
+
+## 3.5.0
+
+ - **FEAT**(android): Bump `compileSdk` version of Android plugins to latest stable (34) ([#12566](https://github.com/firebase/flutterfire/issues/12566)). ([e891fab2](https://github.com/firebase/flutterfire/commit/e891fab291e9beebc223000b133a6097e066a7fc))
+
+## 3.4.20
+
+ - Update a dependency to the latest release.
+
+## 3.4.19
+
+ - Update a dependency to the latest release.
+
+## 3.4.18
+
+ - Update a dependency to the latest release.
+
+## 3.4.17
+
+ - Update a dependency to the latest release.
+
+## 3.4.16
+
+ - Update a dependency to the latest release.
+
+## 3.4.15
+
+ - Update a dependency to the latest release.
+
+## 3.4.14
+
+ - Update a dependency to the latest release.
+
+## 3.4.13
+
+ - Update a dependency to the latest release.
+
+## 3.4.12
+
+ - Update a dependency to the latest release.
+
+## 3.4.11
+
+ - Update a dependency to the latest release.
+
+## 3.4.10
+
+ - Update a dependency to the latest release.
+
 ## 3.4.9
 
  - **FIX**(crashlytics): update exception `reason` to ensure it does not produce incorrect value in Firebase console ([#12053](https://github.com/firebase/flutterfire/issues/12053)). ([1cf38b86](https://github.com/firebase/flutterfire/commit/1cf38b86e640d0b64dcc8614b04d870478067b84))

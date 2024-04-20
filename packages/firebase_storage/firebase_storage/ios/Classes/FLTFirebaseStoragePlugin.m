@@ -691,17 +691,26 @@ typedef NS_ENUM(NSUInteger, FLTFirebaseStorageStringType) {
                                     [task removeObserverWithHandle:failureHandle];
                                     completion(NO, nil);
                                   }];
-      failureHandle =
-          [task observeStatus:FIRStorageTaskStatusFailure
-                      handler:^(FIRStorageTaskSnapshot *snapshot) {
-                        [task removeObserverWithHandle:successHandle];
-                        [task removeObserverWithHandle:failureHandle];
-                        if (snapshot.error && snapshot.error.code == FIRStorageErrorCodeCancelled) {
-                          completion(YES, [FLTFirebaseStoragePlugin parseTaskSnapshot:snapshot]);
-                        } else {
-                          completion(NO, nil);
-                        }
-                      }];
+      failureHandle = [task
+          observeStatus:FIRStorageTaskStatusFailure
+                handler:^(FIRStorageTaskSnapshot *snapshot) {
+                  [task removeObserverWithHandle:successHandle];
+                  [task removeObserverWithHandle:failureHandle];
+
+                  if (snapshot.error && snapshot.error && snapshot.error.userInfo) {
+                    // For UploadTask, the error code is found in the userInfo
+                    // We use it to match this:
+                    // https://github.com/firebase/firebase-ios-sdk/blob/main/FirebaseStorage/Sources/StorageError.swift#L37
+                    NSNumber *responseErrorCode = snapshot.error.userInfo[@"ResponseErrorCode"];
+                    if ([responseErrorCode integerValue] == FIRStorageErrorCodeCancelled ||
+                        snapshot.error.code == FIRStorageErrorCodeCancelled) {
+                      completion(YES, [FLTFirebaseStoragePlugin parseTaskSnapshot:snapshot]);
+                      return;
+                    }
+                  }
+
+                  completion(NO, nil);
+                }];
       [task cancel];
     } else {
       completion(NO, nil);
@@ -712,7 +721,7 @@ typedef NS_ENUM(NSUInteger, FLTFirebaseStorageStringType) {
   completion(NO, nil);
 }
 
-- (NSDictionary *)NSDictionaryFromNSError:(NSError *)error {
++ (NSDictionary *)NSDictionaryFromNSError:(NSError *)error {
   NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
   NSString *code = @"unknown";
   NSString *message = [error localizedDescription];
@@ -765,7 +774,7 @@ typedef NS_ENUM(NSUInteger, FLTFirebaseStorageStringType) {
   if (error == nil) {
     return nil;
   }
-  NSDictionary *dictionary = [self NSDictionaryFromNSError:error];
+  NSDictionary *dictionary = [FLTFirebaseStoragePlugin NSDictionaryFromNSError:error];
   return [FlutterError errorWithCode:dictionary[@"code"]
                              message:dictionary[@"message"]
                              details:@{}];
@@ -779,7 +788,7 @@ typedef NS_ENUM(NSUInteger, FLTFirebaseStorageStringType) {
       [FLTFirebasePlugin firebaseAppNameFromIosName:snapshot.reference.storage.app.name];
   dictionary[kFLTFirebaseStorageKeyBucket] = snapshot.reference.bucket;
   if (snapshot.error != nil) {
-    dictionary[@"error"] = [self NSDictionaryFromNSError:snapshot.error];
+    dictionary[@"error"] = [FLTFirebaseStoragePlugin NSDictionaryFromNSError:snapshot.error];
   } else {
     dictionary[kFLTFirebaseStorageKeySnapshot] =
         [FLTFirebaseStoragePlugin parseTaskSnapshot:snapshot];

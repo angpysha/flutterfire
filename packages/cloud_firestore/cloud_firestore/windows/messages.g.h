@@ -96,6 +96,27 @@ enum class Source {
   cache = 2
 };
 
+// The listener retrieves data and listens to updates from the local Firestore
+// cache only. If the cache is empty, an empty snapshot will be returned.
+// Snapshot events will be triggered on cache updates, like local mutations or
+// load bundles.
+//
+// Note that the data might be stale if the cache hasn't synchronized with
+// recent server-side changes.
+enum class ListenSource {
+  // The default behavior. The listener attempts to return initial snapshot from
+  // cache and retrieve up-to-date snapshots from the Firestore server.
+  // Snapshot events will be triggered on local mutations and server side
+  // updates.
+  defaultSource = 0,
+  // The listener retrieves data and listens to updates from the local Firestore
+  // cache only.
+  // If the cache is empty, an empty snapshot will be returned.
+  // Snapshot events will be triggered on cache updates, like local mutations or
+  // load bundles.
+  cache = 1
+};
+
 enum class ServerTimestampBehavior {
   // Return null for [FieldValue.serverTimestamp()] values that have not yet
   none = 0,
@@ -554,11 +575,12 @@ class AggregateQuery {
 class AggregateQueryResponse {
  public:
   // Constructs an object setting all non-nullable fields.
-  explicit AggregateQueryResponse(const AggregateType& type, double value);
+  explicit AggregateQueryResponse(const AggregateType& type);
 
   // Constructs an object setting all fields.
   explicit AggregateQueryResponse(const AggregateType& type,
-                                  const std::string* field, double value);
+                                  const std::string* field,
+                                  const double* value);
 
   const AggregateType& type() const;
   void set_type(const AggregateType& value_arg);
@@ -567,7 +589,8 @@ class AggregateQueryResponse {
   void set_field(const std::string_view* value_arg);
   void set_field(std::string_view value_arg);
 
-  double value() const;
+  const double* value() const;
+  void set_value(const double* value_arg);
   void set_value(double value_arg);
 
  private:
@@ -578,7 +601,7 @@ class AggregateQueryResponse {
   friend class FirebaseFirestoreHostApiCodecSerializer;
   AggregateType type_;
   std::optional<std::string> field_;
-  double value_;
+  std::optional<double> value_;
 };
 
 class FirebaseFirestoreHostApiCodecSerializer
@@ -684,10 +707,12 @@ class FirebaseFirestoreHostApi {
       const FirestorePigeonFirebaseApp& app, const std::string& path,
       bool is_collection_group, const PigeonQueryParameters& parameters,
       const PigeonGetOptions& options, bool include_metadata_changes,
+      const ListenSource& source,
       std::function<void(ErrorOr<std::string> reply)> result) = 0;
   virtual void DocumentReferenceSnapshot(
       const FirestorePigeonFirebaseApp& app,
       const DocumentReferenceRequest& parameters, bool include_metadata_changes,
+      const ListenSource& source,
       std::function<void(ErrorOr<std::string> reply)> result) = 0;
 
   // The codec used by FirebaseFirestoreHostApi.

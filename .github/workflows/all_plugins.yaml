@@ -28,11 +28,11 @@ jobs:
         with:
           channel: 'stable'
           cache: true
-      - uses: bluefireteam/melos-action@dd3c344d731938d2ab2567a261f54a19a68b5f6a
+      - uses: bluefireteam/melos-action@5a8367ec4b9942d712528c398ff3f996e03bc230
         with:
           melos-version: '3.0.1'
       - name: 'Run Analyze'
-        run: melos run analyze
+        run: melos analyze-ci
 
   # Separated from "analyse" action as pubspec_override file is not being taken into account when running `flutter pub publish --dry-run`
   # This will fail on CI until this is fixed: https://github.com/invertase/melos/issues/467
@@ -46,7 +46,7 @@ jobs:
         with:
           channel: 'stable'
           cache: true
-      - uses: bluefireteam/melos-action@dd3c344d731938d2ab2567a261f54a19a68b5f6a
+      - uses: bluefireteam/melos-action@5a8367ec4b9942d712528c398ff3f996e03bc230
         with:
           melos-version: '3.0.1'
       - name: 'Pub Check'
@@ -63,7 +63,7 @@ jobs:
         with:
           channel: 'stable'
           cache: true
-      - uses: bluefireteam/melos-action@dd3c344d731938d2ab2567a261f54a19a68b5f6a
+      - uses: bluefireteam/melos-action@5a8367ec4b9942d712528c398ff3f996e03bc230
         with:
           melos-version: '3.0.1'
       - name: 'Flutter Pub Get'
@@ -72,7 +72,8 @@ jobs:
             "flutter pub get"
 
   format:
-    runs-on: ubuntu-latest
+    # switch back to ubuntu-latest when swiftformat is working again
+    runs-on: macos-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
@@ -80,12 +81,13 @@ jobs:
         with:
           channel: 'stable'
           cache: true
-      - uses: bluefireteam/melos-action@dd3c344d731938d2ab2567a261f54a19a68b5f6a
+      - uses: bluefireteam/melos-action@5a8367ec4b9942d712528c398ff3f996e03bc230
         with:
           melos-version: '3.0.1'
       - uses: Homebrew/actions/setup-homebrew@master
       - name: 'Install Tools'
         run: |
+          alias python=python3
           flutter pub global activate flutter_plugin_tools
           brew install swiftformat
           brew install clang-format
@@ -113,7 +115,7 @@ jobs:
         with:
           channel: 'stable'
           cache: true
-      - uses: bluefireteam/melos-action@dd3c344d731938d2ab2567a261f54a19a68b5f6a
+      - uses: bluefireteam/melos-action@5a8367ec4b9942d712528c398ff3f996e03bc230
         with:
           melos-version: '3.0.1'
       - name: 'Build Examples'
@@ -130,7 +132,7 @@ jobs:
         with:
           channel: 'stable'
           cache: true
-      - uses: bluefireteam/melos-action@dd3c344d731938d2ab2567a261f54a19a68b5f6a
+      - uses: bluefireteam/melos-action@5a8367ec4b9942d712528c398ff3f996e03bc230
         with:
           melos-version: '3.0.1'
       - name: 'Flutter Test'
@@ -143,16 +145,16 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
-      - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe
+      - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491
         with:
           go-version: '^1.13.1'
       # Go is used by addlicense command (addlicense is used in melos run
       # check-license-header)
       - run: go install github.com/google/addlicense@latest
       - name: Install Dart
-        uses: dart-lang/setup-dart@d6a63dab3335f427404425de0fbfed4686d93c4f
+        uses: dart-lang/setup-dart@fedb1266e91cf51be2fdb382869461a434b920a3
       - name: Install Melos
-        uses: bluefireteam/melos-action@dd3c344d731938d2ab2567a261f54a19a68b5f6a
+        uses: bluefireteam/melos-action@5a8367ec4b9942d712528c398ff3f996e03bc230
         with:
           # Running `melos bootstrap` is not needed because we use Melos just
           # for the `check-license-header` script.

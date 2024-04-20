@@ -376,12 +376,14 @@ FlutterStandardMethodCodec *_codec;
 - (void)documentReferenceSnapshotApp:(nonnull FirestorePigeonFirebaseApp *)app
                           parameters:(nonnull DocumentReferenceRequest *)parameters
               includeMetadataChanges:(nonnull NSNumber *)includeMetadataChanges
+                              source:(ListenSource)source
                           completion:(nonnull void (^)(NSString *_Nullable,
                                                        FlutterError *_Nullable))completion {
   FIRFirestore *firestore = [self getFIRFirestoreFromAppNameFromPigeon:app];
   FIRDocumentReference *document = [firestore documentWithPath:parameters.path];
   FIRServerTimestampBehavior serverTimestampBehavior =
       [FirestorePigeonParser parseServerTimestampBehavior:parameters.serverTimestampBehavior.value];
+  FIRListenSource listenSource = [FirestorePigeonParser parseListenSource:source];
 
   completion(
       [self registerEventChannelWithPrefix:kFLTFirebaseFirestoreDocumentSnapshotEventChannelName
@@ -390,7 +392,8 @@ FlutterStandardMethodCodec *_codec;
                                                              reference:document
                                                 includeMetadataChanges:includeMetadataChanges
                                                                            .boolValue
-                                               serverTimestampBehavior:serverTimestampBehavior]],
+                                               serverTimestampBehavior:serverTimestampBehavior
+                                                                source:listenSource]],
       nil);
 }
 
@@ -516,6 +519,7 @@ FlutterStandardMethodCodec *_codec;
                 parameters:(nonnull PigeonQueryParameters *)parameters
                    options:(nonnull PigeonGetOptions *)options
     includeMetadataChanges:(nonnull NSNumber *)includeMetadataChanges
+                    source:(ListenSource)source
                 completion:
                     (nonnull void (^)(NSString *_Nullable, FlutterError *_Nullable))completion {
   FIRFirestore *firestore = [self getFIRFirestoreFromAppNameFromPigeon:app];
@@ -533,6 +537,7 @@ FlutterStandardMethodCodec *_codec;
 
   FIRServerTimestampBehavior serverTimestampBehavior =
       [FirestorePigeonParser parseServerTimestampBehavior:options.serverTimestampBehavior];
+  FIRListenSource listenSource = [FirestorePigeonParser parseListenSource:source];
 
   completion(
       [self registerEventChannelWithPrefix:kFLTFirebaseFirestoreQuerySnapshotEventChannelName
@@ -541,7 +546,8 @@ FlutterStandardMethodCodec *_codec;
                                                                  query:query
                                                 includeMetadataChanges:includeMetadataChanges
                                                                            .boolValue
-                                               serverTimestampBehavior:serverTimestampBehavior]],
+                                               serverTimestampBehavior:serverTimestampBehavior
+                                                                source:listenSource]],
       nil);
 }
 
@@ -796,30 +802,41 @@ FlutterStandardMethodCodec *_codec;
                          break;
                        }
                        case AggregateTypeSum: {
-                         double doubleValue = [[snapshot
+                         NSNumber *value = [snapshot
                              valueForAggregateField:[FIRAggregateField
                                                         aggregateFieldForSumOfField:[queryRequest
-                                                                                        field]]]
-                             doubleValue];
+                                                                                        field]]];
 
                          [aggregateResponses
                              addObject:[AggregateQueryResponse
                                            makeWithType:AggregateTypeSum
                                                   field:queryRequest.field
-                                                  value:[NSNumber numberWithDouble:doubleValue]]];
+                                                  // This passes either a double (wrapped in
+                                                  // NSNumber) or null value
+                                                  value:value != ((id)[NSNull null])
+                                                            ? [NSNumber
+                                                                  numberWithDouble:[value
+                                                                                       doubleValue]]
+                                                            : value]];
                          break;
                        }
                        case AggregateTypeAverage: {
-                         double doubleValue = [[snapshot
-                             valueForAggregateField:[FIRAggregateField
-                                                        aggregateFieldForAverageOfField:
-                                                            [queryRequest field]]] doubleValue];
+                         NSNumber *value = [snapshot
+                             valueForAggregateField:
+                                 [FIRAggregateField
+                                     aggregateFieldForAverageOfField:[queryRequest field]]];
 
                          [aggregateResponses
                              addObject:[AggregateQueryResponse
                                            makeWithType:AggregateTypeAverage
                                                   field:queryRequest.field
-                                                  value:[NSNumber numberWithDouble:doubleValue]]];
+                                                  // This passes either a double (wrapped in
+                                                  // NSNumber) or null value
+                                                  value:value != ((id)[NSNull null])
+                                                            ? [NSNumber
+                                                                  numberWithDouble:[value
+                                                                                       doubleValue]]
+                                                            : value]];
                          break;
                        }
                      }
