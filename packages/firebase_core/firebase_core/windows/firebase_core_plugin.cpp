@@ -26,7 +26,7 @@
 #include <string>
 #include <vector>
 #include "include/firebase_core/firebase_plugin_registry.h"
-#include "include/firebase_core/singleton.h"
+//#include "include/firebase_core/singleton.h"
 
 using ::firebase::App;
 
@@ -106,9 +106,9 @@ namespace firebase_core_windows {
         //response.set_plugin_constants()
         //auto plugin_registry = FirebasePluginRegistry::GetInstance();
         //  auto firebaseRegistry = (FirebasePluginRegistry*)get_flutter_firebase_plugin_registry();
-        auto firebaseRegistry = singleton<FirebasePluginRegistry>();
+        auto firebaseRegistry = FirebasePluginRegistry::GetInstance();
 
-        std::vector<std::shared_ptr<FlutterFirebasePlugin>>& values = firebaseRegistry.p_constants();
+        std::vector<std::shared_ptr<FlutterFirebasePlugin>>& values = firebaseRegistry->p_constants();
 
         std::string app_name(app.name());
 

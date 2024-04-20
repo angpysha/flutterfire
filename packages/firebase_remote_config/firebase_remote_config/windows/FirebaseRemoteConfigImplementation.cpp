@@ -188,6 +188,7 @@ namespace firebase_remote_config_windows
         //auto appps = firebase::App::GetApps();
         //auto app = firebase::App::GetInstance(name.c_str());
         auto app = const_cast<::firebase::App*>(&firebaseApp);
+        //app->SetDefaultConfigPath()
         auto remoteConfig = RemoteConfig::GetInstance(app);
         auto configSettings = remoteConfig->GetConfigSettings();
         auto fetchTimeout = static_cast<int64_t>(configSettings.fetch_timeout_in_milliseconds);
@@ -204,6 +205,10 @@ namespace firebase_remote_config_windows
         values.insert({ EncodableValue("minimumFetchInterval"), EncodableValue(minFetchTimeout) });
         values.insert({ EncodableValue("lastFetchTime"), EncodableValue(lastFetch) });
         values.insert({ EncodableValue("lastFetchStatus"), EncodableValue(lastFetchStatusMapped.c_str()) });
+
+        //std::vector<ConfigKeyValueVariant> variants{};
+
+        //remoteConfig->SetDefaults(variants.data(), 0);
 
         auto allItems = remoteConfig->GetAll();
 

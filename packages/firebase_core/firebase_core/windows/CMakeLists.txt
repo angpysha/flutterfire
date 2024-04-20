@@ -72,13 +72,13 @@ list(APPEND PLUGIN_SOURCES
         "include/firebase_core/firebase_core_api.h"
 )
 
-set(singleton_sources
-        "include/firebase_core/singleton.h"
-        "include/firebase_core/singleton_api.h"
-        "singleton.cpp"
-)
+#set(singleton_sources
+#        "include/firebase_core/singleton.h"
+#        "include/firebase_core/singleton_api.h"
+#        "singleton.cpp"
+#)
 
-add_library(singleton SHARED ${singleton_sources})
+#add_library(singleton SHARED ${singleton_sources})
 
 # Read version from pubspec.yaml
 file(STRINGS "../pubspec.yaml" pubspec_content)
@@ -150,7 +150,7 @@ target_link_libraries(${PLUGIN_NAME} PUBLIC "${FIREBASE_LIBS}" "${ADDITIONAL_LIB
 
 target_include_directories(${PLUGIN_NAME} INTERFACE
         "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(${PLUGIN_NAME} PUBLIC flutter flutter_wrapper_plugin singleton)
+target_link_libraries(${PLUGIN_NAME} PUBLIC flutter flutter_wrapper_plugin)
 
 # List of absolute paths to libraries that should be bundled with the plugin.
 # This list could contain prebuilt libraries, or libraries created by an

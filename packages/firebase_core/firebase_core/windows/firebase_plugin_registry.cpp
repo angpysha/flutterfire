@@ -5,7 +5,7 @@
 #include "include/firebase_core/firebase_plugin_registry.h"
 #include "firebase/app.h"
 #include <windows.h>
-#include "include/firebase_core/singleton.h"
+//#include "include/firebase_core/singleton.h"
 
 extern firebase_core_windows::FirebasePluginRegistry* registry_instance_ = 0;
 
@@ -24,8 +24,7 @@ namespace firebase_core_windows {
     void FirebasePluginRegistry::RegisterPlugin(std::string pluginName, std::string version,
                                                 FlutterFirebasePlugin *plugin) {
 //        std::lock_guard<std::mutex> lock(mutex_);
-        firebase::App::RegisterLibrary(pluginName.c_str(), version.c_str(),
-                                       nullptr);
+        firebase::App::RegisterLibrary(pluginName.c_str(), version.c_str(), nullptr);
 
 //        auto plugin_name = plugin->plugin_name();
 //        auto plugin_constants = plugin->get_plugin_constants();
@@ -76,12 +75,12 @@ namespace firebase_core_windows {
 //    return &firebase_core_windows::FirebasePluginRegistry::GetInstance();
 //}
 
-MY_DLL_API ::firebase_core_windows::FirebasePluginRegistry &get_flutter_firebase_plugin_registry() {
-    ::firebase_core_windows::FirebasePluginRegistry &singl = singleton<::firebase_core_windows::FirebasePluginRegistry>();
-    return singl;
-}
-
-MY_DLL_API void add_plugin_constant(std::shared_ptr<::firebase_core_windows::FlutterFirebasePlugin> item) {
-    ::firebase_core_windows::FirebasePluginRegistry &singl = singleton<::firebase_core_windows::FirebasePluginRegistry>();
-    singl.put_plugin_ref(item);
-}
+//MY_DLL_API ::firebase_core_windows::FirebasePluginRegistry &get_flutter_firebase_plugin_registry() {
+//    ::firebase_core_windows::FirebasePluginRegistry &singl = singleton<::firebase_core_windows::FirebasePluginRegistry>();
+//    return singl;
+//}
+//
+//MY_DLL_API void add_plugin_constant(std::shared_ptr<::firebase_core_windows::FlutterFirebasePlugin> item) {
+//    ::firebase_core_windows::FirebasePluginRegistry &singl = singleton<::firebase_core_windows::FirebasePluginRegistry>();
+//    singl.put_plugin_ref(item);
+//}

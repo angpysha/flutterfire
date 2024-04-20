@@ -111,6 +111,44 @@ namespace firebase_remote_config_windows
         result(std::nullopt);
     }
 
+    std::pair<std::vector<ConfigKeyValueVariant>, std::vector<std::pair<std::string, std::string>>> convert_to_native_(const flutter::EncodableMap& default_parameters)
+    {
+       /* std::vector<ConfigKeyValue> parameter;
+
+        for (auto &items : default_parameters)
+        {
+            if (std::holds_alternative<std::string>(items.first) && std::holds_alternative<std::string>(items.second))
+            {
+                std::string key_str = std::get<std::string>(items.first);
+                std::string value_str = std::get<std::string>(items.second);
+
+                ConfigKeyValue value = { key_str.c_str(), value_str.c_str() };
+                parameter.push_back(value);
+            }
+        }
+
+        return parameter;*/
+        std::vector<ConfigKeyValueVariant> parameters;
+        std::vector<std::pair<std::string, std::string>> storage;
+
+        for (const auto& items : default_parameters) {
+            if (std::holds_alternative<std::string>(items.first) && std::holds_alternative<std::string>(items.second)) {
+                std::string key_str = std::get<std::string>(items.first);
+                std::string value_str = std::get<std::string>(items.second);
+
+                storage.emplace_back(std::move(key_str), std::move(value_str));
+                const auto& stored_pair = storage.back();
+
+                ConfigKeyValueVariant kv;
+                kv.key = stored_pair.first.c_str();
+                kv.value = stored_pair.second.c_str();
+                parameters.push_back(kv);
+            }
+        }
+
+        return { std::move(parameters), std::move(storage) };
+    }
+
     void remote_config_pigeon_implemetation::SetDefaults(
         const std::string& app_name,
         const flutter::EncodableMap& default_parameters,
@@ -119,6 +157,10 @@ namespace firebase_remote_config_windows
         auto firebase_app = App::GetInstance(app_name.c_str());
         auto remote_config = RemoteConfig::GetInstance(firebase_app);
 
+        auto converted_vector = convert_to_native_(default_parameters);
+
+        //remote_config->SetDefaults(converted_vector.first.data(), converted_vector.first.size());
+        //remote_config->SetDefaults()
        // remote_config->SetDefaults()
     }
 

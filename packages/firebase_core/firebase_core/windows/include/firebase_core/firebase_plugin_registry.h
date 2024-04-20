@@ -64,6 +64,6 @@ namespace firebase_core_windows {
 }
 #endif //TODO_POINTS_FIREBASE_PLUGIN_REGISTRY_H
 
-MY_DLL_API ::firebase_core_windows::FirebasePluginRegistry& get_flutter_firebase_plugin_registry();
+//MY_DLL_API ::firebase_core_windows::FirebasePluginRegistry& get_flutter_firebase_plugin_registry();
 
-MY_DLL_API void add_plugin_constant(std::shared_ptr<::firebase_core_windows::FlutterFirebasePlugin> item);
+//MY_DLL_API void add_plugin_constant(std::shared_ptr<::firebase_core_windows::FlutterFirebasePlugin> item);

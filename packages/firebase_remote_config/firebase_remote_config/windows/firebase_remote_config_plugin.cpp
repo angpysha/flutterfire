@@ -17,7 +17,7 @@
 
 // #include "FirebaseRemoteConfigImplementation.h"
 #include "FirebaseRemoteConfigImplementation.h"
-#include "firebase_core/singleton.h"
+//#include "firebase_core/singleton.h"
 #include "messages.g.h"
 #include "remote_config_pigeon_implemetation.h"
 
@@ -48,13 +48,13 @@ namespace firebase_remote_config_windows
         // auto remoteConfigImplementation = new FirebaseRemoteConfigImplementation();
         // RemoteConfigHostApi::SetUp(registrar->messenger(), remoteConfigImplementation);
         //   auto firebaseRegistry = (firebase_core_windows::FirebasePluginRegistry*)get_flutter_firebase_plugin_registry();
-        auto firebaseRegistry = singleton<firebase_core_windows::FirebasePluginRegistry>();
-
-        //firebaseRegistry.RegisterPlugin("test", "test", remoteConfigImplementation);
-        ::firebase::App::RegisterLibrary("firebase_remote_config", "5.0.0", nullptr);
+        auto firebaseRegistry = firebase_core_windows::FirebasePluginRegistry::GetInstance();
         auto shared_plugin = std::make_shared<FirebaseRemoteConfigImplementation>();
-        //        firebaseRegistry.put_plugin_ref(shared_plugin);
-        add_plugin_constant(shared_plugin);
+
+        //firebaseRegistry->RegisterPlugin("test", "test", remoteConfigImplementation);
+        ::firebase::App::RegisterLibrary("firebase_remote_config", "5.0.0", nullptr);
+        firebaseRegistry->put_plugin_ref(shared_plugin);
+        //add_plugin_constant(shared_plugin);
 
         auto impl = new remote_config_pigeon_implemetation();
         RemoteConfigHostApi::SetUp(registrar->messenger(), impl);
