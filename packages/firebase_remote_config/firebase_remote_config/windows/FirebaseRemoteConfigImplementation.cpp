@@ -18,9 +18,8 @@ namespace firebase_remote_config_windows
         if (lastFetchStatus == kLastFetchStatusSuccess) {
             return "success";
         }
-        else if (lastFetchStatus == kLastFetchStatusFailure) {
+        else if (lastFetchStatus == kLastFetchStatusFailure)
             return "failure";
-        }
         else if (lastFetchStatus == kLastFetchStatusPending) {
             return "noFetchYet";
         }

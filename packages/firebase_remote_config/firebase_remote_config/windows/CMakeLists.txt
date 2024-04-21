@@ -43,7 +43,7 @@ foreach(line ${pubspec_content})
     endif()
 endforeach(line)
 
-configure_file(plugin_version.h.in ${CMAKE_BINARY_DIR}/generated/firebase_auth/plugin_version.h)
+configure_file(plugin_version.h.in ${CMAKE_BINARY_DIR}/generated/firebase_remote_config/plugin_version.h)
 include_directories(${CMAKE_BINARY_DIR}/generated/)
 
 # Define the plugin library target. Its name must not be changed (see comment
@@ -52,7 +52,7 @@ add_library(${PLUGIN_NAME} STATIC
         "include/firebase_remote_config/firebase_remote_config_plugin_c_api.h"
         "firebase_remote_config_plugin_c_api.cpp"
         ${PLUGIN_SOURCES}
-        ${CMAKE_BINARY_DIR}/generated/firebase_auth/plugin_version.h
+        ${CMAKE_BINARY_DIR}/generated/firebase_remote_config/plugin_version.h
 )
 
 # Apply a standard set of build settings that are configured in the
