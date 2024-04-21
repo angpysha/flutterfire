@@ -15,9 +15,7 @@
 #include <memory>
 #include <sstream>
 
-// #include "FirebaseRemoteConfigImplementation.h"
 #include "FirebaseRemoteConfigImplementation.h"
-//#include "firebase_core/singleton.h"
 #include <flutter/event_channel.h>
 #include <flutter/event_stream_handler_functions.h>
 
@@ -33,7 +31,7 @@ namespace firebase_remote_config_windows
 {
     const char* kEventChannelName = "plugins.flutter.io/firebase_remote_config_updated";
     std::unique_ptr<flutter::EventSink<flutter::EncodableValue>> sink_;
-    // static
+
     void FirebaseRemoteConfigPlugin::RegisterWithRegistrar(
         flutter::PluginRegistrarWindows* registrar)
     {
@@ -50,60 +48,44 @@ namespace firebase_remote_config_windows
                 plugin_pointer->HandleMethodCall(call, std::move(result));
             });
 
-        // auto remoteConfigImplementation = new FirebaseRemoteConfigImplementation();
-        // RemoteConfigHostApi::SetUp(registrar->messenger(), remoteConfigImplementation);
-        //   auto firebaseRegistry = (firebase_core_windows::FirebasePluginRegistry*)get_flutter_firebase_plugin_registry();
-        auto firebaseRegistry = firebase_core_windows::FirebasePluginRegistry::GetInstance();
-        auto shared_plugin = std::make_shared<FirebaseRemoteConfigImplementation>();
+        const auto firebase_registry = firebase_core_windows::FirebasePluginRegistry::GetInstance();
+        const auto shared_plugin = std::make_shared<FirebaseRemoteConfigImplementation>();
 
-        //firebaseRegistry->RegisterPlugin("test", "test", remoteConfigImplementation);
         ::firebase::App::RegisterLibrary("firebase_remote_config", "5.0.0", nullptr);
-        firebaseRegistry->put_plugin_ref(shared_plugin);
-        //add_plugin_constant(shared_plugin);
+        firebase_registry->put_plugin_ref(shared_plugin);
 
-        auto impl = new remote_config_pigeon_implemetation();
+        const auto impl = new remote_config_pigeon_implemetation();
         RemoteConfigHostApi::SetUp(registrar->messenger(), impl);
-        //"plugins.flutter.io/firebase_remote_config_updated"
 
-        auto event_channel = std::make_unique<flutter::EventChannel<flutter::EncodableValue>>(
+        const auto event_channel = std::make_unique<flutter::EventChannel<flutter::EncodableValue>>(
             registrar->messenger(), kEventChannelName,
             &flutter::StandardMethodCodec::GetInstance());
-
-        // auto eventChannelHandler = [](std::unique_ptr<flutter::StreamHandler<flutter::EncodableMap>> handler)
-        // {
-        //     handler->
-        // };
-
-        // template <typename T>
-        // using StreamHandlerListen =
-        //     std::function<std::unique_ptr<StreamHandlerError<T>>(
-        //         const T* arguments,
-        //         std::unique_ptr<EventSink<T>>&& events)>;
-
-        // auto eventChannelHandler = std::make_unique<flutter::StreamHandler<flutter::EncodableValue>>(
-        //     [](const flutter::EncodableValue* arguments,
-        //         std::unique_ptr<flutter::EventSink<flutter::EncodableValue>> events,
-        //         std::unique_ptr<flutter::StreamHandlerError<flutter::EncodableValue>> error) {
-        //             // Handle the event here.
-        //     },
-        //     [](const flutter::EncodableValue* arguments,
-        //     std::unique_ptr<flutter::StreamHandlerError<flutter::EncodableValue>> error) {
-        //             // Handle cancellation here.
-        //     });
-        // template <typename T>
-        // using StreamHandlerCancel =
-        //     std::function<std::unique_ptr<StreamHandlerError<T>>(const T* arguments)>;
-
-       // event_channel->SetStreamHandler(std::move(eventChannelHandler));
-
 
         auto eventChannelHandler = std::make_unique<flutter::StreamHandlerFunctions<flutter::EncodableValue>>([&](const flutter::EncodableValue* arguments,
             std::unique_ptr<flutter::EventSink<flutter::EncodableValue>> sink)->std::unique_ptr < flutter::StreamHandlerError < flutter::EncodableValue >>
             {
-                sink_ = std::move(sink);
-                auto firebaseApp = ::firebase::App::GetInstance();
+                //sink_ = std::move(sink);
+                auto firebaseApp = ::firebase::App::GetInstance(firebase_core_windows::FirebasePluginRegistry::GetInstance()->app_name.c_str());
                 auto remoteConfig = ::firebase::remote_config::RemoteConfig::GetInstance(firebaseApp);
+                auto registration = remoteConfig->AddOnConfigUpdateListener([&sink, this](ConfigUpdate&& config_update, RemoteConfigError error)
+                    {
+                        const auto updatedKeys = config_update.updated_keys;
+                        flutter::EncodableList keys{};
 
+                        for (const auto& key : updatedKeys)
+                        {
+                            keys.push_back(flutter::EncodableValue(key));
+                        }
+                        sink->Success(flutter::EncodableValue(keys));
+                        /*flutter::EncodableMap map;
+                        map[flutter::EncodableValue("source")] = flutter::EncodableValue(static_cast<int>(config_update.source));
+                        map[flutter::EncodableValue("status")] = flutter::EncodableValue(static_cast<int>(config_update.status));
+                        map[flutter::EncodableValue("lastFetchTime")] = flutter::EncodableValue(static_cast<int>(config_update.last_fetch_time));
+                        map[flutter::EncodableValue("failureReason")] = flutter::EncodableValue(static_cast<int>(config_update.failure_reason));
+                        map[flutter::EncodableValue("message")] = flutter::EncodableValue(config_update.message);
+                        map[flutter::EncodableValue("value")] = flutter::EncodableValue(config_update.value);
+                        sink->Success(flutter::EncodableValue(map));*/
+                    });
                 //remoteConfig->AddOnConfigUpdateListener()
 
                 return nullptr;

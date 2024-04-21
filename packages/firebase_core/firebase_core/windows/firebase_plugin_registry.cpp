@@ -14,7 +14,7 @@ namespace firebase_core_windows {
     // std::map <std::string, FlutterFirebasePlugin*> FirebasePluginRegistry::pluginConstants_{};
 
     FirebasePluginRegistry* FirebasePluginRegistry::GetInstance() {
-        if (registry_instance_ == 0) {
+        if (registry_instance_ == nullptr) {
             registry_instance_ = new FirebasePluginRegistry();
         }
 

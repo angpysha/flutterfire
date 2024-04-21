@@ -111,6 +111,7 @@ namespace firebase_core_windows {
         std::vector<std::shared_ptr<FlutterFirebasePlugin>>& values = firebaseRegistry->p_constants();
 
         std::string app_name(app.name());
+        firebaseRegistry->app_name = app_name;
 
         flutter::EncodableMap result;
         for (const std::shared_ptr<FlutterFirebasePlugin> &val: values) {

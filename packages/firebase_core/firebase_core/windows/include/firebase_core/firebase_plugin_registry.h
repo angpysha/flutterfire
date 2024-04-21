@@ -51,6 +51,7 @@ namespace firebase_core_windows {
         std::map<std::string, FlutterFirebasePlugin*>& pluginConstants();
         void put_plugin_ref(std::shared_ptr<FlutterFirebasePlugin>);
         std::vector<std::shared_ptr<FlutterFirebasePlugin>>& p_constants();
+        std::string app_name;
 
     private:
 //        FirebasePluginRegistry() = default;
