@@ -69,7 +69,6 @@ namespace firebase_remote_config_windows
                         }
                         sink->Success(flutter::EncodableValue(keys));
                     });
-                //remoteConfig->AddOnConfigUpdateListener()
 
                 return nullptr;
             },
@@ -79,7 +78,6 @@ namespace firebase_remote_config_windows
             });
 
         event_channel->SetStreamHandler(std::move(eventChannelHandler));
-        //event_channel->
 
         registrar->AddPlugin(std::move(plugin));
     }
