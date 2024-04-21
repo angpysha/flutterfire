@@ -30,6 +30,8 @@ namespace firebase_remote_config_windows
                 result(std::nullopt);
             });
 
+        //remote_config->
+
         //        initialized_future.OnCompletion([&] (const Future<ConfigInfo*>) -> {
         //            result(std::nullopt);
         //        });

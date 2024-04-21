@@ -18,16 +18,21 @@
 // #include "FirebaseRemoteConfigImplementation.h"
 #include "FirebaseRemoteConfigImplementation.h"
 //#include "firebase_core/singleton.h"
+#include <flutter/event_channel.h>
+#include <flutter/event_stream_handler_functions.h>
+
 #include "messages.g.h"
 #include "remote_config_pigeon_implemetation.h"
 
 using namespace firebase::remote_config;
 
-extern "C" firebase_core_windows::FirebasePluginRegistry* GetFlutterFirebaseRegistry();
+extern "C" firebase_core_windows::FirebasePluginRegistry * GetFlutterFirebaseRegistry();
 
 
 namespace firebase_remote_config_windows
 {
+    const char* kEventChannelName = "plugins.flutter.io/firebase_remote_config_updated";
+    std::unique_ptr<flutter::EventSink<flutter::EncodableValue>> sink_;
     // static
     void FirebaseRemoteConfigPlugin::RegisterWithRegistrar(
         flutter::PluginRegistrarWindows* registrar)
@@ -59,6 +64,57 @@ namespace firebase_remote_config_windows
         auto impl = new remote_config_pigeon_implemetation();
         RemoteConfigHostApi::SetUp(registrar->messenger(), impl);
         //"plugins.flutter.io/firebase_remote_config_updated"
+
+        auto event_channel = std::make_unique<flutter::EventChannel<flutter::EncodableValue>>(
+            registrar->messenger(), kEventChannelName,
+            &flutter::StandardMethodCodec::GetInstance());
+
+        // auto eventChannelHandler = [](std::unique_ptr<flutter::StreamHandler<flutter::EncodableMap>> handler)
+        // {
+        //     handler->
+        // };
+
+        // template <typename T>
+        // using StreamHandlerListen =
+        //     std::function<std::unique_ptr<StreamHandlerError<T>>(
+        //         const T* arguments,
+        //         std::unique_ptr<EventSink<T>>&& events)>;
+
+        // auto eventChannelHandler = std::make_unique<flutter::StreamHandler<flutter::EncodableValue>>(
+        //     [](const flutter::EncodableValue* arguments,
+        //         std::unique_ptr<flutter::EventSink<flutter::EncodableValue>> events,
+        //         std::unique_ptr<flutter::StreamHandlerError<flutter::EncodableValue>> error) {
+        //             // Handle the event here.
+        //     },
+        //     [](const flutter::EncodableValue* arguments,
+        //     std::unique_ptr<flutter::StreamHandlerError<flutter::EncodableValue>> error) {
+        //             // Handle cancellation here.
+        //     });
+        // template <typename T>
+        // using StreamHandlerCancel =
+        //     std::function<std::unique_ptr<StreamHandlerError<T>>(const T* arguments)>;
+
+       // event_channel->SetStreamHandler(std::move(eventChannelHandler));
+
+
+        auto eventChannelHandler = std::make_unique<flutter::StreamHandlerFunctions<flutter::EncodableValue>>([&](const flutter::EncodableValue* arguments,
+            std::unique_ptr<flutter::EventSink<flutter::EncodableValue>> sink)->std::unique_ptr < flutter::StreamHandlerError < flutter::EncodableValue >>
+            {
+                sink_ = std::move(sink);
+                auto firebaseApp = ::firebase::App::GetInstance();
+                auto remoteConfig = ::firebase::remote_config::RemoteConfig::GetInstance(firebaseApp);
+
+                //remoteConfig->AddOnConfigUpdateListener()
+
+                return nullptr;
+            },
+            [](const flutter::EncodableValue* arguments) ->std::unique_ptr < flutter::StreamHandlerError < flutter::EncodableValue >>
+            {
+                return nullptr;
+            });
+
+        event_channel->SetStreamHandler(std::move(eventChannelHandler));
+        //event_channel->
 
         registrar->AddPlugin(std::move(plugin));
     }
