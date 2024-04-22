@@ -2,8 +2,9 @@ name: firebase_remote_config_web
 description: The web implementation of firebase_remote_config
 homepage: https://github.com/firebase/flutterfire/tree/master/packages/firebase_remote_config/firebase_remote_config_web
 repository: https://github.com/firebase/flutterfire/tree/master/packages/firebase_remote_config/firebase_remote_config_web
+publish_to: https://dart.pkg.jetbrains.space/angpysha/p/main/todo-points-dart-private/
 
-version: 1.6.2
+version: 1.6.2-remote-config
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -11,8 +12,14 @@ environment:
 
 dependencies:
   firebase_core: ^2.30.0
+#  firebase_core:
+#    hosted: https://dart.pkg.jetbrains.space/angpysha/p/main/todo-points-dart-private/
+#    version: ^2.30.0-remote-config
   firebase_core_web: ^2.15.0
-  firebase_remote_config_platform_interface: ^1.4.30
+  firebase_remote_config_platform_interface: ^2.0.0
+#  firebase_remote_config_platform_interface:
+#    hosted: https://dart.pkg.jetbrains.space/angpysha/p/main/todo-points-dart-private/
+#    version: ^2.0.0-remote-config
   flutter:
     sdk: flutter
   flutter_web_plugins:
@@ -24,6 +31,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   mockito: ^5.0.0
+
 
 flutter:
   plugin:

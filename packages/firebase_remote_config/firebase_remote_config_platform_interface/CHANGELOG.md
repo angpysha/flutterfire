@@ -1,3 +1,6 @@
+## 2.0.0-remote-config
+ - Add remote config support for Windows
+
 ## 1.4.30
 
  - Update a dependency to the latest release.

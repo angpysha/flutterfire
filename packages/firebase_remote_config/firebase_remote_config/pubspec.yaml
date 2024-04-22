@@ -4,7 +4,8 @@ description:
   re-releasing.
 homepage: https://firebase.google.com/docs/remote-config
 repository: https://github.com/firebase/flutterfire/tree/master/packages/firebase_remote_config/firebase_remote_config
-version: 5.0.0
+version: 5.0.0-remote-config
+publish_to: https://dart.pkg.jetbrains.space/angpysha/p/main/todo-points-dart-private/
 
 false_secrets:
   - example/**
@@ -27,13 +28,13 @@ dev_dependencies:
   mockito: ^5.0.0
   plugin_platform_interface: ^2.1.3
 
-dependency_overrides:
-  firebase_remote_config_platform_interface:
-    path: D:\\proj\\flutterfire\\packages\\firebase_remote_config\\firebase_remote_config_platform_interface
-  firebase_core:
-    path: D:\\proj\\flutterfire\\packages\\firebase_core\\firebase_core
-  firebase_core_platform_interface:
-    path: D:\\proj\\flutterfire\\packages\\firebase_core\\firebase_core_platform_interface
+#dependency_overrides:
+#  firebase_remote_config_platform_interface:
+#    path: D:\\proj\\flutterfire\\packages\\firebase_remote_config\\firebase_remote_config_platform_interface
+#  firebase_core:
+#    path: D:\\proj\\flutterfire\\packages\\firebase_core\\firebase_core
+#  firebase_core_platform_interface:
+#    path: D:\\proj\\flutterfire\\packages\\firebase_core\\firebase_core_platform_interface
 
 flutter:
   plugin:
