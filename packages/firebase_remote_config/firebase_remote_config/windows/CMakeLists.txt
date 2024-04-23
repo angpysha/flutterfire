@@ -72,7 +72,7 @@ target_compile_definitions(${PLUGIN_NAME} PRIVATE -DINTERNAL_EXPERIMENTAL=1)
 # Source include directories and library dependencies. Add any plugin-specific
 # dependencies here.
 set(MSVC_RUNTIME_MODE MD)
-set(firebase_libs firebase_core_plugin firebase_remote_config firebase_app)
+set(firebase_libs firebase_core_plugin firebase_remote_config)
 set(ADDITIONAL_LIBS advapi32 ws2_32 crypt32 rpcrt4 ole32)
 target_link_libraries(${PLUGIN_NAME} PRIVATE "${firebase_libs}" "${ADDITIONAL_LIBS}")
 
