@@ -17,6 +17,8 @@
 #include <flutter/method_channel.h>
 #include <flutter/plugin_registrar_windows.h>
 #include <flutter/standard_method_codec.h>
+#include "include/firebase_core/firebase_plugin_registry.h"
+
 
 #include <future>
 #include <iostream>
@@ -102,6 +104,22 @@ PigeonInitializeResponse AppToPigeonInitializeResponse(const App &app) {
   PigeonInitializeResponse response = PigeonInitializeResponse();
   response.set_name(app.name());
   response.set_options(optionsFromFIROptions(app.options()));
+
+  auto firebaseRegistry = FirebasePluginRegistry::GetInstance();
+
+  std::vector<std::shared_ptr<FlutterFirebasePlugin>>& values = firebaseRegistry->p_constants();
+
+  std::string app_name(app.name());
+  firebaseRegistry->app_name = app_name;
+
+  flutter::EncodableMap result;
+  for (const std::shared_ptr<FlutterFirebasePlugin> &val: values) {
+      flutter::EncodableMap constants = val->get_plugin_constants(app);
+      result[flutter::EncodableValue(val->plugin_name().c_str())] = flutter::EncodableValue(constants);
+  }
+
+  response.set_plugin_constants(result);
+
   return response;
 }
 
