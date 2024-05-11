@@ -4,8 +4,7 @@ description:
   re-releasing.
 homepage: https://firebase.google.com/docs/remote-config
 repository: https://github.com/firebase/flutterfire/tree/master/packages/firebase_remote_config/firebase_remote_config
-version: 5.0.0-remote-config
-publish_to: https://dart.pkg.jetbrains.space/angpysha/p/main/todo-points-dart-private/
+version: 4.4.5
 
 false_secrets:
   - example/**
@@ -15,10 +14,10 @@ environment:
   flutter: '>=3.3.0'
 
 dependencies:
-  firebase_core: ^2.30.0
+  firebase_core: ^2.31.0
   firebase_core_platform_interface: ^5.0.0
-  firebase_remote_config_platform_interface: ^1.4.30
-  firebase_remote_config_web: ^1.6.2
+  firebase_remote_config_platform_interface: ^1.4.33
+  firebase_remote_config_web: ^1.6.5
   flutter:
     sdk: flutter
 
@@ -27,14 +26,6 @@ dev_dependencies:
     sdk: flutter
   mockito: ^5.0.0
   plugin_platform_interface: ^2.1.3
-
-#dependency_overrides:
-#  firebase_remote_config_platform_interface:
-#    path: D:\\proj\\flutterfire\\packages\\firebase_remote_config\\firebase_remote_config_platform_interface
-#  firebase_core:
-#    path: D:\\proj\\flutterfire\\packages\\firebase_core\\firebase_core
-#  firebase_core_platform_interface:
-#    path: D:\\proj\\flutterfire\\packages\\firebase_core\\firebase_core_platform_interface
 
 flutter:
   plugin:
@@ -48,5 +39,3 @@ flutter:
         pluginClass: FLTFirebaseRemoteConfigPlugin
       web:
         default_package: firebase_remote_config_web
-      windows:
-        pluginClass: FirebaseRemoteConfigPluginCApi

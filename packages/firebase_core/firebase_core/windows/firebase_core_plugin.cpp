@@ -1,3 +1,4 @@
+        }
 // Copyright 2023, the Chromium project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
@@ -25,174 +26,160 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include "include/firebase_core/firebase_plugin_registry.h"
-//#include "include/firebase_core/singleton.h"
 
 using ::firebase::App;
 
-//extern "C" firebase_core_windows::FirebasePluginRegistry* GetFlutterFirebaseRegistry();
-
 namespace firebase_core_windows {
-    static std::string kLibraryName = "flutter-fire-core";
 
-    // static
-    void FirebaseCorePlugin::RegisterWithRegistrar(
-            flutter::PluginRegistrarWindows *registrar) {
-        auto plugin = std::make_unique<FirebaseCorePlugin>();
+static std::string kLibraryName = "flutter-fire-core";
 
-        FirebaseCoreHostApi::SetUp(registrar->messenger(), plugin.get());
-        FirebaseAppHostApi::SetUp(registrar->messenger(), plugin.get());
+// static
+void FirebaseCorePlugin::RegisterWithRegistrar(
+    flutter::PluginRegistrarWindows *registrar) {
+  auto plugin = std::make_unique<FirebaseCorePlugin>();
 
-        registrar->AddPlugin(std::move(plugin));
+  FirebaseCoreHostApi::SetUp(registrar->messenger(), plugin.get());
+  FirebaseAppHostApi::SetUp(registrar->messenger(), plugin.get());
 
-        // Register for platform logging
-        App::RegisterLibrary(kLibraryName.c_str(), getPluginVersion().c_str(),
-                             nullptr);
-    }
+  registrar->AddPlugin(std::move(plugin));
 
-    FirebaseCorePlugin::FirebaseCorePlugin() {
-    }
+  // Register for platform logging
+  App::RegisterLibrary(kLibraryName.c_str(), getPluginVersion().c_str(),
+                       nullptr);
+}
 
-    FirebaseCorePlugin::~FirebaseCorePlugin() = default;
+FirebaseCorePlugin::FirebaseCorePlugin() {}
 
-    // Convert a Pigeon FirebaseOptions to a Firebase Options.
-    firebase::AppOptions PigeonFirebaseOptionsToAppOptions(
-            const PigeonFirebaseOptions &pigeon_options) {
-        firebase::AppOptions options;
-        options.set_api_key(pigeon_options.api_key().c_str());
-        options.set_app_id(pigeon_options.app_id().c_str());
-        if (pigeon_options.database_u_r_l() != nullptr) {
-            options.set_database_url(pigeon_options.database_u_r_l()->c_str());
-        }
-        if (pigeon_options.tracking_id() != nullptr) {
-            options.set_ga_tracking_id(pigeon_options.tracking_id()->c_str());
-        }
-        options.set_messaging_sender_id(pigeon_options.messaging_sender_id().c_str());
+FirebaseCorePlugin::~FirebaseCorePlugin() = default;
 
-        options.set_project_id(pigeon_options.project_id().c_str());
+// Convert a Pigeon FirebaseOptions to a Firebase Options.
+firebase::AppOptions PigeonFirebaseOptionsToAppOptions(
+    const PigeonFirebaseOptions &pigeon_options) {
+  firebase::AppOptions options;
+  options.set_api_key(pigeon_options.api_key().c_str());
+  options.set_app_id(pigeon_options.app_id().c_str());
+  if (pigeon_options.database_u_r_l() != nullptr) {
+    options.set_database_url(pigeon_options.database_u_r_l()->c_str());
+  }
+  if (pigeon_options.tracking_id() != nullptr) {
+    options.set_ga_tracking_id(pigeon_options.tracking_id()->c_str());
+  }
+  options.set_messaging_sender_id(pigeon_options.messaging_sender_id().c_str());
 
-        if (pigeon_options.storage_bucket() != nullptr) {
-            options.set_storage_bucket(pigeon_options.storage_bucket()->c_str());
-        }
+  options.set_project_id(pigeon_options.project_id().c_str());
 
-        return options;
-    }
+  if (pigeon_options.storage_bucket() != nullptr) {
+    options.set_storage_bucket(pigeon_options.storage_bucket()->c_str());
+  }
+  return options;
+}
 
-    // Convert a AppOptions to PigeonInitializeOption
-    PigeonFirebaseOptions optionsFromFIROptions(
-            const firebase::AppOptions &options) {
-        PigeonFirebaseOptions pigeon_options = PigeonFirebaseOptions();
-        pigeon_options.set_api_key(options.api_key());
-        pigeon_options.set_app_id(options.app_id());
-        if (options.database_url() != nullptr) {
-            pigeon_options.set_database_u_r_l(options.database_url());
-        }
-        pigeon_options.set_tracking_id(nullptr);
-        pigeon_options.set_messaging_sender_id(options.messaging_sender_id());
-        pigeon_options.set_project_id(options.project_id());
-        if (options.storage_bucket() != nullptr) {
-            pigeon_options.set_storage_bucket(options.storage_bucket());
-        }
+// Convert a AppOptions to PigeonInitializeOption
+PigeonFirebaseOptions optionsFromFIROptions(
+    const firebase::AppOptions &options) {
+  PigeonFirebaseOptions pigeon_options = PigeonFirebaseOptions();
+  pigeon_options.set_api_key(options.api_key());
+  pigeon_options.set_app_id(options.app_id());
+  // AppOptions initialises as empty char so we check to stop empty string to
+  // Flutter Same for storage bucket below
+  const char *db_url = options.database_url();
+  if (db_url != nullptr && db_url[0] != '\0') {
+    pigeon_options.set_database_u_r_l(db_url);
+  }
+  pigeon_options.set_tracking_id(nullptr);
+  pigeon_options.set_messaging_sender_id(options.messaging_sender_id());
+  pigeon_options.set_project_id(options.project_id());
 
-        return pigeon_options;
-    }
+  const char *storage_bucket = options.storage_bucket();
+  if (storage_bucket != nullptr && storage_bucket[0] != '\0') {
+    pigeon_options.set_storage_bucket(storage_bucket);
+  }
+  return pigeon_options;
+}
 
-    // Convert a firebase::App to PigeonInitializeResponse
-    PigeonInitializeResponse AppToPigeonInitializeResponse(const App &app) {
-        PigeonInitializeResponse response = PigeonInitializeResponse();
-        response.set_name(app.name());
-        response.set_options(optionsFromFIROptions(app.options()));
+// Convert a firebase::App to PigeonInitializeResponse
+PigeonInitializeResponse AppToPigeonInitializeResponse(const App &app) {
+  PigeonInitializeResponse response = PigeonInitializeResponse();
+  response.set_name(app.name());
+  response.set_options(optionsFromFIROptions(app.options()));
+  return response;
+}
 
-        //response.set_plugin_constants()
-        //auto plugin_registry = FirebasePluginRegistry::GetInstance();
-        //  auto firebaseRegistry = (FirebasePluginRegistry*)get_flutter_firebase_plugin_registry();
+void FirebaseCorePlugin::InitializeApp(
+    const std::string &app_name,
+    const PigeonFirebaseOptions &initialize_app_request,
+    std::function<void(ErrorOr<PigeonInitializeResponse> reply)> result) {
+  // Create an app
+  App *app =
+      App::Create(PigeonFirebaseOptionsToAppOptions(initialize_app_request),
+                  app_name.c_str());
+
+  // Send back the result to Flutter
+  result(AppToPigeonInitializeResponse(*app));
+}
+
+void FirebaseCorePlugin::InitializeCore(
+    std::function<void(ErrorOr<flutter::EncodableList> reply)> result) {
+  // TODO: Missing function to get the list of currently initialized apps
+  std::vector<PigeonInitializeResponse> initializedApps;
+  std::vector<App *> all_apps = App::GetApps();
+  for (const App *app : all_apps) {
+    initializedApps.push_back(AppToPigeonInitializeResponse(*app));
+  }
+
+  flutter::EncodableList encodableList;
+
+  for (const auto &item : initializedApps) {
+    encodableList.push_back(flutter::CustomEncodableValue(item));
+  }
+  result(encodableList);
+}
+
+void FirebaseCorePlugin::OptionsFromResource(
+    std::function<void(ErrorOr<PigeonFirebaseOptions> reply)> result) {}
+
+void FirebaseCorePlugin::SetAutomaticDataCollectionEnabled(
+    const std::string &app_name, bool enabled,
+    std::function<void(std::optional<FlutterError> reply)> result) {
+  App *firebaseApp = App::GetInstance(app_name.c_str());
+  if (firebaseApp != nullptr) {
+    // TODO: Missing method
+  }
+  result(std::nullopt);
+}
+
+void FirebaseCorePlugin::SetAutomaticResourceManagementEnabled(
+    const std::string &app_name, bool enabled,
+    std::function<void(std::optional<FlutterError> reply)> result) {
+  App *firebaseApp = App::GetInstance(app_name.c_str());
+  if (firebaseApp != nullptr) {
+    // TODO: Missing method
+  }
+
+  result(std::nullopt);
+}
+
+void FirebaseCorePlugin::Delete(
+    const std::string &app_name,
+    std::function<void(std::optional<FlutterError> reply)> result) {
+  App *firebaseApp = App::GetInstance(app_name.c_str());
+  if (firebaseApp != nullptr) {
+    // TODO: Missing method
+  }
+
+  result(std::nullopt);
+}
+
+}  // namespace firebase_core_windows
+
+#include "include/firebase_core/firebase_plugin_registry.h"
         auto firebaseRegistry = FirebasePluginRegistry::GetInstance();
-
         std::vector<std::shared_ptr<FlutterFirebasePlugin>>& values = firebaseRegistry->p_constants();
-
-        std::string app_name(app.name());
         firebaseRegistry->app_name = app_name;
-
+        std::string app_name(app.name());
         flutter::EncodableMap result;
         for (const std::shared_ptr<FlutterFirebasePlugin> &val: values) {
             flutter::EncodableMap constants = val->get_plugin_constants(app);
             result[flutter::EncodableValue(val->plugin_name().c_str())] = flutter::EncodableValue(constants);
-        }
-        // for (const auto &pair: values) {
-        //     auto constants = pair.second->get_plugin_constants(app_name);
-        //     result[flutter::EncodableValue(pair.first)] = flutter::EncodableValue(pair.second);
-        // }
-
-        // result.insert({flutter::EncodableValue("plugins.flutter.io/firebase_remote_config"), flutter::EncodableMap()});
-
         response.set_plugin_constants(result);
-
         return response;
-    }
-
-    void FirebaseCorePlugin::InitializeApp(
-            const std::string &app_name,
-            const PigeonFirebaseOptions &initialize_app_request,
-            std::function<void(ErrorOr<PigeonInitializeResponse> reply)> result) {
-        // Create an app
-        App *app =
-                App::Create(PigeonFirebaseOptionsToAppOptions(initialize_app_request),
-                            app_name.c_str());
-
-        // Send back the result to Flutter
-        result(AppToPigeonInitializeResponse(*app));
-    }
-
-    void FirebaseCorePlugin::InitializeCore(
-            std::function<void(ErrorOr<flutter::EncodableList> reply)> result) {
-        // TODO: Missing function to get the list of currently initialized apps
-        std::vector <PigeonInitializeResponse> initializedApps;
-        std::vector < App * > all_apps = App::GetApps();
-        for (const App *app: all_apps) {
-            initializedApps.push_back(AppToPigeonInitializeResponse(*app));
-        }
-
-        flutter::EncodableList encodableList;
-
-        for (const auto &item: initializedApps) {
-            encodableList.push_back(flutter::CustomEncodableValue(item));
-        }
-        result(encodableList);
-    }
-
-    void FirebaseCorePlugin::OptionsFromResource(
-            std::function<void(ErrorOr<PigeonFirebaseOptions> reply)> result) {
-    }
-
-    void FirebaseCorePlugin::SetAutomaticDataCollectionEnabled(
-            const std::string &app_name, bool enabled,
-            std::function<void(std::optional < FlutterError > reply)> result) {
-        App *firebaseApp = App::GetInstance(app_name.c_str());
-        if (firebaseApp != nullptr) {
-            // TODO: Missing method
-        }
-        result(std::nullopt);
-    }
-
-    void FirebaseCorePlugin::SetAutomaticResourceManagementEnabled(
-            const std::string &app_name, bool enabled,
-            std::function<void(std::optional < FlutterError > reply)> result) {
-        App *firebaseApp = App::GetInstance(app_name.c_str());
-        if (firebaseApp != nullptr) {
-            // TODO: Missing method
-        }
-
-        result(std::nullopt);
-    }
-
-    void FirebaseCorePlugin::Delete(
-            const std::string &app_name,
-            std::function<void(std::optional < FlutterError > reply)> result) {
-        App *firebaseApp = App::GetInstance(app_name.c_str());
-        if (firebaseApp != nullptr) {
-            // TODO: Missing method
-        }
-
-        result(std::nullopt);
-    }
-} // namespace firebase_core_windows

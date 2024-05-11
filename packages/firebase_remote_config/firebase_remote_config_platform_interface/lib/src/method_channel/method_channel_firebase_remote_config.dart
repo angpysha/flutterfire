@@ -6,7 +6,6 @@
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_remote_config_platform_interface/src/pigeon/messages.pigeon.dart';
 import 'package:flutter/services.dart';
 
 import '../../firebase_remote_config_platform_interface.dart';
@@ -17,8 +16,6 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
   /// Creates a new instance for a given [FirebaseApp].
   MethodChannelFirebaseRemoteConfig({required FirebaseApp app})
       : super(appInstance: app);
-
-  RemoteConfigHostApi get _hostApi => RemoteConfigHostApi();
 
   /// Internal stub class initializer.
   ///
@@ -110,11 +107,10 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
   @override
   Future<void> ensureInitialized() async {
     try {
-      // await channel.invokeMethod<void>(
-      //     'RemoteConfig#ensureInitialized', <String, dynamic>{
-      //   'appName': app.name,
-      // });
-      await _hostApi.ensureInitialized(app.name);
+      await channel.invokeMethod<void>(
+          'RemoteConfig#ensureInitialized', <String, dynamic>{
+        'appName': app.name,
+      });
     } catch (exception, stackTrace) {
       convertPlatformException(exception, stackTrace);
     }
@@ -123,11 +119,10 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
   @override
   Future<bool> activate() async {
     try {
-      // bool? configChanged = await channel
-      //     .invokeMethod<bool>('RemoteConfig#activate', <String, dynamic>{
-      //   'appName': app.name,
-      // });
-      bool? configChanged = await _hostApi.activate(app.name);
+      bool? configChanged = await channel
+          .invokeMethod<bool>('RemoteConfig#activate', <String, dynamic>{
+        'appName': app.name,
+      });
       await _updateConfigParameters();
       return configChanged!;
     } catch (exception, stackTrace) {
@@ -138,10 +133,9 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
   @override
   Future<void> fetch() async {
     try {
-      // await channel.invokeMethod<void>('RemoteConfig#fetch', <String, dynamic>{
-      //   'appName': app.name,
-      // });
-      await _hostApi.fetch(app.name);
+      await channel.invokeMethod<void>('RemoteConfig#fetch', <String, dynamic>{
+        'appName': app.name,
+      });
       await _updateConfigProperties();
     } catch (exception, stackTrace) {
       // Ensure that fetch status is updated.
@@ -153,11 +147,10 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
   @override
   Future<bool> fetchAndActivate() async {
     try {
-      // bool? configChanged = await channel.invokeMethod<bool>(
-      //     'RemoteConfig#fetchAndActivate', <String, dynamic>{
-      //   'appName': app.name,
-      // });
-      bool? configChanged = await _hostApi.fetchAndActivate(app.name);
+      bool? configChanged = await channel.invokeMethod<bool>(
+          'RemoteConfig#fetchAndActivate', <String, dynamic>{
+        'appName': app.name,
+      });
       await _updateConfigParameters();
       await _updateConfigProperties();
       return configChanged!;
@@ -218,16 +211,13 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
     RemoteConfigSettings remoteConfigSettings,
   ) async {
     try {
-      // await channel
-      //     .invokeMethod('RemoteConfig#setConfigSettings', <String, dynamic>{
-      //   'appName': app.name,
-      //   'fetchTimeout': remoteConfigSettings.fetchTimeout.inSeconds,
-      //   'minimumFetchInterval':
-      //       remoteConfigSettings.minimumFetchInterval.inSeconds,
-      // });
-      await _hostApi.setConfigSettings(app.name,
-          remoteConfigSettings.fetchTimeout.inSeconds,
-          remoteConfigSettings.minimumFetchInterval.inSeconds);
+      await channel
+          .invokeMethod('RemoteConfig#setConfigSettings', <String, dynamic>{
+        'appName': app.name,
+        'fetchTimeout': remoteConfigSettings.fetchTimeout.inSeconds,
+        'minimumFetchInterval':
+            remoteConfigSettings.minimumFetchInterval.inSeconds,
+      });
       await _updateConfigProperties();
     } catch (exception, stackTrace) {
       convertPlatformException(exception, stackTrace);
@@ -237,11 +227,10 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
   @override
   Future<void> setDefaults(Map<String, dynamic> defaultParameters) async {
     try {
-      // await channel.invokeMethod('RemoteConfig#setDefaults', <String, dynamic>{
-      //   'appName': app.name,
-      //   'defaults': defaultParameters
-      // });
-      await _hostApi.setDefaults(app.name, defaultParameters);
+      await channel.invokeMethod('RemoteConfig#setDefaults', <String, dynamic>{
+        'appName': app.name,
+        'defaults': defaultParameters
+      });
       await _updateConfigParameters();
     } catch (exception, stackTrace) {
       convertPlatformException(exception, stackTrace);
@@ -249,22 +238,20 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
   }
 
   Future<void> _updateConfigParameters() async {
-    // Map<dynamic, dynamic>? parameters = await channel
-    //     .invokeMapMethod<dynamic, dynamic>(
-    //         'RemoteConfig#getAll', <String, dynamic>{
-    //   'appName': app.name,
-    // });
-    Map<dynamic, dynamic>? parameters = await _hostApi.getAll(app.name);
+    Map<dynamic, dynamic>? parameters = await channel
+        .invokeMapMethod<dynamic, dynamic>(
+            'RemoteConfig#getAll', <String, dynamic>{
+      'appName': app.name,
+    });
     _activeParameters = _parseParameters(parameters!);
   }
 
   Future<void> _updateConfigProperties() async {
-    // Map<dynamic, dynamic>? properties = await channel
-    //     .invokeMapMethod<dynamic, dynamic>(
-    //         'RemoteConfig#getProperties', <String, dynamic>{
-    //   'appName': app.name,
-    // });
-    Map<dynamic, dynamic>? properties = await _hostApi.getProperties(app.name);
+    Map<dynamic, dynamic>? properties = await channel
+        .invokeMapMethod<dynamic, dynamic>(
+            'RemoteConfig#getProperties', <String, dynamic>{
+      'appName': app.name,
+    });
     final fetchTimeout = Duration(seconds: properties!['fetchTimeout']);
     final minimumFetchInterval =
         Duration(seconds: properties['minimumFetchInterval']);

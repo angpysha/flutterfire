@@ -2,7 +2,7 @@
 // Copyright 2020 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'dart:developer';
+
 part of firebase_core_platform_interface;
 
 /// The interface that other FlutterFire plugins must extend.
@@ -37,6 +37,7 @@ abstract class FirebasePluginPlatform extends PlatformInterface {
   Map<dynamic, dynamic> get pluginConstants {
     final appConstants =
         _constantsForPluginApps[_appName] as Map<Object?, Object?>?;
+
     if (appConstants != null && appConstants[_methodChannelName] != null) {
       return appConstants[_methodChannelName]! as Map<dynamic, dynamic>;
     }
