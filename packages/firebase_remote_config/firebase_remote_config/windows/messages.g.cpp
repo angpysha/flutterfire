@@ -38,7 +38,7 @@ void RemoteConfigHostApi::SetUp(
   flutter::BinaryMessenger* binary_messenger,
   RemoteConfigHostApi* api) {
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(binary_messenger, "dev.flutter.pigeon.firebase_remote_config_platform_interface.RemoteConfigHostApi.ensureInitialized", &GetCodec());
+    auto channel = std::make_unique<BasicMessageChannel<>>(binary_messenger, "RemoteConfig#ensureInitialized", &GetCodec());
     if (api != nullptr) {
       channel->SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
         try {
@@ -67,7 +67,7 @@ void RemoteConfigHostApi::SetUp(
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(binary_messenger, "dev.flutter.pigeon.firebase_remote_config_platform_interface.RemoteConfigHostApi.activate", &GetCodec());
+    auto channel = std::make_unique<BasicMessageChannel<>>(binary_messenger, "RemoteConfig#activate", &GetCodec());
     if (api != nullptr) {
       channel->SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
         try {
@@ -96,7 +96,7 @@ void RemoteConfigHostApi::SetUp(
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(binary_messenger, "dev.flutter.pigeon.firebase_remote_config_platform_interface.RemoteConfigHostApi.fetch", &GetCodec());
+    auto channel = std::make_unique<BasicMessageChannel<>>(binary_messenger, "RemoteConfig#fetch", &GetCodec());
     if (api != nullptr) {
       channel->SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
         try {
@@ -125,7 +125,7 @@ void RemoteConfigHostApi::SetUp(
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(binary_messenger, "dev.flutter.pigeon.firebase_remote_config_platform_interface.RemoteConfigHostApi.fetchAndActivate", &GetCodec());
+    auto channel = std::make_unique<BasicMessageChannel<>>(binary_messenger, "RemoteConfig#fetchAndActivate", &GetCodec());
     if (api != nullptr) {
       channel->SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
         try {
@@ -154,7 +154,7 @@ void RemoteConfigHostApi::SetUp(
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(binary_messenger, "dev.flutter.pigeon.firebase_remote_config_platform_interface.RemoteConfigHostApi.setConfigSettings", &GetCodec());
+    auto channel = std::make_unique<BasicMessageChannel<>>(binary_messenger, "RemoteConfig#setConfigSettings", &GetCodec());
     if (api != nullptr) {
       channel->SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
         try {
@@ -195,7 +195,7 @@ void RemoteConfigHostApi::SetUp(
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(binary_messenger, "dev.flutter.pigeon.firebase_remote_config_platform_interface.RemoteConfigHostApi.setDefaults", &GetCodec());
+    auto channel = std::make_unique<BasicMessageChannel<>>(binary_messenger, "RemoteConfig#setDefaults", &GetCodec());
     if (api != nullptr) {
       channel->SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
         try {
@@ -230,7 +230,7 @@ void RemoteConfigHostApi::SetUp(
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(binary_messenger, "dev.flutter.pigeon.firebase_remote_config_platform_interface.RemoteConfigHostApi.getAll", &GetCodec());
+    auto channel = std::make_unique<BasicMessageChannel<>>(binary_messenger, "RemoteConfig#getAll", &GetCodec());
     if (api != nullptr) {
       channel->SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
         try {
@@ -264,7 +264,7 @@ void RemoteConfigHostApi::SetUp(
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(binary_messenger, "dev.flutter.pigeon.firebase_remote_config_platform_interface.RemoteConfigHostApi.getProperties", &GetCodec());
+    auto channel = std::make_unique<BasicMessageChannel<>>(binary_messenger, "RemoteConfig#getProperties", &GetCodec());
     if (api != nullptr) {
       channel->SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
         try {
