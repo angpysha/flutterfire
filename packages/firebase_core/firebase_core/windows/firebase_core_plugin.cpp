@@ -1,4 +1,3 @@
-        }
 // Copyright 2023, the Chromium project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
@@ -189,15 +188,3 @@ void FirebaseCorePlugin::Delete(
 }
 
 }  // namespace firebase_core_windows
-
-#include "include/firebase_core/firebase_plugin_registry.h"
-        auto firebaseRegistry = FirebasePluginRegistry::GetInstance();
-        std::vector<std::shared_ptr<FlutterFirebasePlugin>>& values = firebaseRegistry->p_constants();
-        firebaseRegistry->app_name = app_name;
-        std::string app_name(app.name());
-        flutter::EncodableMap result;
-        for (const std::shared_ptr<FlutterFirebasePlugin> &val: values) {
-            flutter::EncodableMap constants = val->get_plugin_constants(app);
-            result[flutter::EncodableValue(val->plugin_name().c_str())] = flutter::EncodableValue(constants);
-        response.set_plugin_constants(result);
-        return response;

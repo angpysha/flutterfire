@@ -65,6 +65,7 @@ list(APPEND PLUGIN_SOURCES
   "firebase_core_plugin.h"
   "messages.g.cpp"
   "messages.g.h"
+  "firebase_plugin_registry.cpp"
 )
 
 # Read version from pubspec.yaml
@@ -89,6 +90,7 @@ include_directories(${CMAKE_BINARY_DIR}/generated/)
 # on PLUGIN_NAME above).
 add_library(${PLUGIN_NAME} STATIC
   "include/firebase_core/firebase_core_plugin_c_api.h"
+  "include/firebase_core/firebase_plugin_registry.h"
   "firebase_core_plugin_c_api.cpp"
   ${PLUGIN_SOURCES}
   ${CMAKE_BINARY_DIR}/generated/firebase_core/plugin_version.h
