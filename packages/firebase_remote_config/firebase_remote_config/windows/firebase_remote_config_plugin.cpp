@@ -31,6 +31,7 @@ extern "C" firebase_core_windows::FirebasePluginRegistry * GetFlutterFirebaseReg
 namespace firebase_remote_config_windows
 {
     const char* kEventChannelName = "plugins.flutter.io/firebase_remote_config_updated";
+    const char* kMethodChannelName = "plugins.flutter.io/firebase_remote_config";
     const char* kRemoteConfigLibrary = "firebase_remote_config_windows";
     std::unique_ptr<flutter::EventSink<flutter::EncodableValue>> sink_;
 
@@ -47,6 +48,10 @@ namespace firebase_remote_config_windows
 
         const auto impl = new remote_config_pigeon_implemetation();
         RemoteConfigHostApi::SetUp(registrar->messenger(), impl);
+
+        // const auto method_channel = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+        //     registrar->messenger(), kMethodChannelName,
+        //     &flutter::StandardMethodCodec::GetInstance());
 
         const auto event_channel = std::make_unique<flutter::EventChannel<flutter::EncodableValue>>(
             registrar->messenger(), kEventChannelName,
@@ -78,6 +83,11 @@ namespace firebase_remote_config_windows
             });
 
         event_channel->SetStreamHandler(std::move(eventChannelHandler));
+
+        // method_channel->SetMethodCallHandler([plugin_pointer = plugin.get()](const auto& call, auto result)
+        //     {
+        //         plugin_pointer->HandleMethodCall(call, std::move(result));
+        //     });
 
         registrar->AddPlugin(std::move(plugin));
     }
@@ -111,6 +121,24 @@ namespace firebase_remote_config_windows
                 version_stream << "7";
             }
             result->Success(flutter::EncodableValue(version_stream.str()));
+        }
+        else if (method_call.method_name().compare("RemoteConfig#ensureInitialized"))
+        {
+            int ii = 0;
+            // const auto app_name = std::get<flutter::EncodableList>(method_call.arguments());
+            // const auto firebaseApp = ::firebase::App::GetInstance(app_name.c_str());
+            // const auto remoteConfig = ::firebase::remote_config::RemoteConfig::GetInstance(firebaseApp);
+            // auto registration = remoteConfig->AddOnConfigUpdateListener([&sink_, this](ConfigUpdate&& config_update, RemoteConfigError error)
+            // {
+            //                        const auto updatedKeys = config_update.updated_keys;
+            //         flutter::EncodableList keys{};
+            //
+            //         for (const auto& key : updatedKeys)
+            //         {
+            //                                    keys.push_back(flutter::EncodableValue(key));
+            //         }
+            //         sink_->Success(flutter::EncodableValue(keys));
+            //     });
         }
         else
         {

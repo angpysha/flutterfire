@@ -116,8 +116,10 @@ public class FirebaseRemoteConfigPlugin
 
   private void setupChannel(BinaryMessenger messenger) {
     registerPlugin(METHOD_CHANNEL, this);
-    channel = new MethodChannel(messenger, METHOD_CHANNEL);
-    channel.setMethodCallHandler(this);
+//    channel = new MethodChannel(messenger, METHOD_CHANNEL);
+//    channel.setMethodCallHandler(this);
+    RemoteConfigHostApiImpl remoteConfigHostApi = new RemoteConfigHostApiImpl();
+    GeneratedAndroidFirebaseRemoteConfig.RemoteConfigHostApi.setUp(messenger, remoteConfigHostApi);
 
     eventChannel = new EventChannel(messenger, EVENT_CHANNEL);
     eventChannel.setStreamHandler(this);

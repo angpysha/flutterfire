@@ -11,6 +11,7 @@ import io.flutter.Log;
 import io.flutter.plugins.firebase.firebaseremoteconfig.GeneratedAndroidFirebaseRemoteConfig.VoidResult;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 public class RemoteConfigHostApiImpl implements GeneratedAndroidFirebaseRemoteConfig.RemoteConfigHostApi {
@@ -84,8 +85,8 @@ public class RemoteConfigHostApiImpl implements GeneratedAndroidFirebaseRemoteCo
     FirebaseApp app = FirebaseApp.getInstance(appName);
     FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.getInstance(app);
     Map<String, FirebaseRemoteConfigValue> items = remoteConfig.getAll();
-    Map<Object, Object> castedItem = new HashMap<>(items);
-    result.success(castedItem);
+    Map<Object, Object> castedItems = parseParameters(items);
+    result.success(castedItems);
   }
 
   @Override
@@ -129,6 +130,35 @@ public class RemoteConfigHostApiImpl implements GeneratedAndroidFirebaseRemoteCo
         return "failure";
       default:
         return "failure";
+    }
+  }
+
+  private Map<Object, Object> parseParameters(Map<String, FirebaseRemoteConfigValue> parameters) {
+    Map<Object, Object> parsedParameters = new HashMap<>();
+    for (String key : parameters.keySet()) {
+      parsedParameters.put(
+        key, createRemoteConfigValueMap(Objects.requireNonNull(parameters.get(key))));
+    }
+    return parsedParameters;
+  }
+
+  private Map<String, Object> createRemoteConfigValueMap(
+    FirebaseRemoteConfigValue remoteConfigValue) {
+    Map<String, Object> valueMap = new HashMap<>();
+    valueMap.put("value", remoteConfigValue.asByteArray());
+    valueMap.put("source", mapValueSource(remoteConfigValue.getSource()));
+    return valueMap;
+  }
+
+  private String mapValueSource(int source) {
+    switch (source) {
+      case FirebaseRemoteConfig.VALUE_SOURCE_DEFAULT:
+        return "default";
+      case FirebaseRemoteConfig.VALUE_SOURCE_REMOTE:
+        return "remote";
+      case FirebaseRemoteConfig.VALUE_SOURCE_STATIC:
+      default:
+        return "static";
     }
   }
 }
