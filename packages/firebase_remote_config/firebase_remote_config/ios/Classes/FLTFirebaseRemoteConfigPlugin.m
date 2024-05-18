@@ -7,6 +7,8 @@
 
 #import "FLTFirebaseRemoteConfigPlugin.h"
 #import "FLTFirebaseRemoteConfigUtils.h"
+#import "FIRRemoteConfigImplementation.h"
+#import "messages.g.h"
 
 NSString *const kFirebaseRemoteConfigChannelName = @"plugins.flutter.io/firebase_remote_config";
 NSString *const kFirebaseRemoteConfigUpdateChannelName =
@@ -43,16 +45,22 @@ BOOL _fetchAndActivateRetry;
 }
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
-  FlutterMethodChannel *channel =
-      [FlutterMethodChannel methodChannelWithName:kFirebaseRemoteConfigChannelName
-                                  binaryMessenger:[registrar messenger]];
+//  FlutterMethodChannel *channel =
+//      [FlutterMethodChannel methodChannelWithName:kFirebaseRemoteConfigChannelName
+//                                  binaryMessenger:[registrar messenger]];
   FlutterEventChannel *eventChannel =
       [FlutterEventChannel eventChannelWithName:kFirebaseRemoteConfigUpdateChannelName
                                 binaryMessenger:[registrar messenger]];
 
   FLTFirebaseRemoteConfigPlugin *instance = [FLTFirebaseRemoteConfigPlugin sharedInstance];
-
-  [registrar addMethodCallDelegate:instance channel:channel];
+    
+   //id firebaseImpl = [[FirebaseRemoteConfigImpl alloc] init];
+    FIRRemoteConfigImplementation* impl = [[FIRRemoteConfigImplementation alloc] init];
+    
+    SetUpRemoteConfigHostApi([registrar messenger], impl);
+    
+    
+  //[registrar addMethodCallDelegate:instance channel:channel];
   [eventChannel setStreamHandler:instance];
 
   SEL sel = NSSelectorFromString(@"registerLibrary:withVersion:");
