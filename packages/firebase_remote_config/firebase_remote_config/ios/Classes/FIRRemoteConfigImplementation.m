@@ -44,8 +44,7 @@
     FIRRemoteConfig* remoteConfig = [FIRRemoteConfig remoteConfigWithApp:firebaseApp];
 
     [remoteConfig activateWithCompletion:^(BOOL changed, NSError * _Nullable error) {
-        int value = changed ? 1 : 0;
-        NSNumber *res = [NSNumber numberWithInt:value];
+        NSNumber *res = [NSNumber numberWithBool:changed];
         completion(res, nil);
     }];
 }
@@ -78,8 +77,7 @@
     FIRRemoteConfig* remoteConfig = [FIRRemoteConfig remoteConfigWithApp:firebaseApp];
     
     [remoteConfig fetchAndActivateWithCompletionHandler:^(FIRRemoteConfigFetchAndActivateStatus status, NSError * _Nullable error) {
-            int statusToReturn = status == FIRRemoteConfigFetchAndActivateStatusError ? 0 : 1;
-            NSNumber* numberStatus = [NSNumber numberWithInt:statusToReturn];
+            NSNumber* numberStatus = [NSNumber numberWithBool:status != FIRRemoteConfigFetchAndActivateStatusError];
             
             completion(numberStatus, nil);
         }];
