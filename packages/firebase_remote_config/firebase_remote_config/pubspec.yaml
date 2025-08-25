@@ -10,6 +10,7 @@ topics:
   - remote
   - config
   - management
+publish_to: https://onepub.dev/api/xhvssdavuh
 
 false_secrets:
   - example/**
